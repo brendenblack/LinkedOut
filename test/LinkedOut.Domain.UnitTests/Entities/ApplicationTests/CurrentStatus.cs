@@ -14,7 +14,7 @@ namespace LinkedOut.Domain.UnitTests.Entities.ApplicationTests
         [Fact]
         public void NewlyCreated_ShouldReturn_INPROGRESS()
         {
-            var search = new JobSearch();
+            var search = new JobSearch("");
             var app = new JobApplication(search, "", "");
 
             app.CurrentStatus.ShouldBe(ApplicationStatuses.INPROGRESS);
