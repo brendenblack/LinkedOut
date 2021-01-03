@@ -56,6 +56,14 @@ namespace LinkedOut.Blazor
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseStartup<Startup>();
+
+                    // Heroku requirement
+                    // https://medium.com/swlh/deploy-your-net-core-3-1-application-to-heroku-with-docker-eb8c96948d32
+                    var port = Environment.GetEnvironmentVariable("PORT");
+                    if (!string.IsNullOrWhiteSpace(port))
+                    {
+                        webBuilder.UseUrls("http://*:" + Environment.GetEnvironmentVariable("PORT"));
+                    }
                 });
     }
 }
