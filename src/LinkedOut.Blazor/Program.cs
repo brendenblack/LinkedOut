@@ -23,30 +23,41 @@ namespace LinkedOut.Blazor
             using (var scope = host.Services.CreateScope())
             {
                 var services = scope.ServiceProvider;
-
+                var logger = services.GetRequiredService<ILogger<Program>>();
                 try
                 {
                     var context = services.GetRequiredService<ApplicationDbContext>();
 
                     if (!context.Database.IsInMemory())
                     {
+                        logger.LogInformation("Attempting to migrate the database...");
                         context.Database.Migrate();
                     }
 
                     var env = services.GetService<IHostEnvironment>();
                     if (env.IsDevelopment())
                     {
+                        logger.LogDebug("Starting up in Development environment");
                         var testUserId = services.GetRequiredService<IConfiguration>().GetValue("TestUserId", Guid.NewGuid().ToString());
                         await ApplicationDbContextSeed.SeedTestData(context, testUserId);
                     }
+
+                    //var server = services.GetService<Microsoft.AspNetCore.Hosting.Server.Features.IServerAddressesFeature>();
+
+                   
+                    logger.LogInformation("We're starting up!");
+                    
                 }
                 catch (Exception ex)
                 {
-                    var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+                    //var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
                     logger.LogError(ex, "An error occurred while migrating or seeding the database");
                 }
+
+                
             }
 
+            
 
             host.Run();
         }

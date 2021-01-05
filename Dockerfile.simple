@@ -1,0 +1,12 @@
+# build & test are described in /.circleci/config.yml
+FROM mcr.microsoft.com/dotnet/aspnet:5.0-buster-slim AS base
+WORKDIR /app
+EXPOSE 80
+EXPOSE 443
+ENV Auth__Authority=https://oidc-test.brendenblack.ca/auth/realms/blackbox-test
+ENV Auth__ClientId=blackbox.client
+ENV Auth__ClientSecret=36da81d0-b0a9-44c3-83b8-cf0b7232e333
+ENV DatabaseType=InMemory
+# ENV ASPNETCORE_URLS=http://*:4040
+COPY src/LinkedOut.Blazor/bin/Release/net5.0/publish .
+ENTRYPOINT ["dotnet", "LinkedOut.Blazor.dll" ]
