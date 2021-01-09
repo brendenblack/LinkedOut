@@ -1,9 +1,0 @@
-# build & test are described in /.circleci/config.yml
-FROM mcr.microsoft.com/dotnet/aspnet:5.0-buster-slim AS base
-WORKDIR /app
-EXPOSE 80
-EXPOSE 443
-# ENV ASPNETCORE_URLS=http://*:4040
-RUN pwd
-COPY src/LinkedOut.Blazor/bin/Release/net5.0/publish .
-ENTRYPOINT ["dotnet", "LinkedOut.Blazor.dll" ]
