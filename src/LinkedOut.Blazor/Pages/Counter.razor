@@ -1,5 +1,5 @@
 ﻿@page "/counter"
-
+@inject ILogger<Counter> _logger
 
 <h1>Counter</h1>
 
@@ -12,6 +12,18 @@
 
     private void IncrementCount()
     {
+        _logger.LogDebug("Unscoped logging message");
+        var scopeDictionary = new Dictionary<string, object>
+        {
+            ["UserId"] = "12345",
+            ["OperationType"] = "increment"
+        };
+
+        using (_logger.BeginScope(scopeDictionary))
+        {
+            _logger.LogDebug("Incrementing count from {CounterCurrent} to {CounterNew}", currentCount, currentCount + 1);
+        }
+
         currentCount++;
     }
 }

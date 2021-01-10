@@ -6,6 +6,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -23,58 +24,69 @@ namespace LinkedOut.Blazor
             using (var scope = host.Services.CreateScope())
             {
                 var services = scope.ServiceProvider;
+                var config = services.GetRequiredService<IConfiguration>();
+                Log.Logger = new LoggerConfiguration()
+                    .ReadFrom.Configuration(config)
+                    .CreateLogger();
+
                 var logger = services.GetRequiredService<ILogger<Program>>();
+
                 try
                 {
                     var context = services.GetRequiredService<ApplicationDbContext>();
 
                     if (!context.Database.IsInMemory())
                     {
-                        logger.LogInformation("Attempting to migrate the database...");
-                        context.Database.Migrate();
+                        var scopeDictionary = new Dictionary<string, object>
+                        {
+                            ["OperationType"] = "dbseed"
+                        };
+
+                        using (logger.BeginScope(scopeDictionary))
+                        {
+                            logger.LogInformation("Attempting to migrate the database...");
+                            context.Database.Migrate();
+                            logger.LogInformation("Migration complete");
+                        }
                     }
 
                     var env = services.GetService<IHostEnvironment>();
                     if (env.IsDevelopment())
                     {
-                        logger.LogDebug("Starting up in Development environment");
+                        logger.LogInformation("Starting up in Development environment");
                         var testUserId = services.GetRequiredService<IConfiguration>().GetValue("TestUserId", Guid.NewGuid().ToString());
                         await ApplicationDbContextSeed.SeedTestData(context, testUserId);
                     }
-
-                    //var server = services.GetService<Microsoft.AspNetCore.Hosting.Server.Features.IServerAddressesFeature>();
-
-                   
-                    logger.LogInformation("We're starting up!");
                     
                 }
                 catch (Exception ex)
                 {
-                    //var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
                     logger.LogError(ex, "An error occurred while migrating or seeding the database");
-                }
-
-                
+                }               
             }
 
+            try
+            {
+                Log.Logger.Information("Starting web host");
+                host.Run();
+            }
+            catch (Exception ex)
+            {
+                Log.Logger.Fatal(ex, "Host terminated unexpectedly");
+            }
+            finally
+            {
+                Log.CloseAndFlush();
+            }
             
-
-            host.Run();
         }
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
+                .UseSerilog()
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseStartup<Startup>();
-
-                    // Heroku requirement
-                    // https://medium.com/swlh/deploy-your-net-core-3-1-application-to-heroku-with-docker-eb8c96948d32
-                    var port = Environment.GetEnvironmentVariable("PORT");
-                    if (!string.IsNullOrWhiteSpace(port))
-                    {
-                        webBuilder.UseUrls("http://*:" + Environment.GetEnvironmentVariable("PORT"));
-                    }
                 });
     }
 }

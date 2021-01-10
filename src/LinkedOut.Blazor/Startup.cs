@@ -29,6 +29,10 @@ namespace LinkedOut.Blazor
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
+
+            services.AddSingleton<IConfiguration>(Configuration);
+
+
             services.AddRazorPages();
             services.AddServerSideBlazor();
             services.Configure<ForwardedHeadersOptions>(options =>
@@ -115,5 +119,6 @@ namespace LinkedOut.Blazor
                 endpoints.MapFallbackToPage("/_Host");
             });
         }
+
     }
 }
