@@ -29,7 +29,6 @@ namespace LinkedOut.Infrastructure
             }
             else
             { 
-
                 services.AddDbContext<ApplicationDbContext>(options =>
                     options.UseInMemoryDatabase("LinkedOutDb"));
             }

@@ -6,6 +6,8 @@ using LinkedOut.Infrastructure;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -27,12 +29,27 @@ namespace LinkedOut.Blazor
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
+
+            services.AddSingleton<IConfiguration>(Configuration);
+
+
             services.AddRazorPages();
             services.AddServerSideBlazor();
+            services.Configure<ForwardedHeadersOptions>(options =>
+            {
+                options.ForwardedHeaders =
+                    ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+            });
             services.AddSingleton<WeatherForecastService>();
 
             services.AddLinkedOut();
             services.AddInfrastructure(Configuration);
+
+            //services.AddHttpsRedirection(options =>
+            //{
+            //    options.RedirectStatusCode = StatusCodes.Status307TemporaryRedirect;
+            //    options.HttpsPort = 5001;
+            //});
 
             services.AddAuthentication(options =>
             {
@@ -85,6 +102,7 @@ namespace LinkedOut.Blazor
             {
                 app.UseExceptionHandler("/Error");
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+                app.UseForwardedHeaders();
                 app.UseHsts();
             }
 
@@ -101,5 +119,6 @@ namespace LinkedOut.Blazor
                 endpoints.MapFallbackToPage("/_Host");
             });
         }
+
     }
 }
