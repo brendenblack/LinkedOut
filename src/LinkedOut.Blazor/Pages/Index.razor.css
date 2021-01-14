@@ -1,0 +1,154 @@
+﻿.logo {
+    width: 120px;
+    height: 31px;
+    /*background: rgba(255, 255, 255, 0.2);
+    margin: 16px 24px 16px 0;*/
+    float: left;
+    font-size: 1.6em;
+    font-weight: 400;
+    color: white;
+}
+
+.hero-section {
+    background-color: white;
+    position: relative;
+    height: 25em;
+    padding: 4em 10em;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+}
+
+.hero-section .hero-header h1 {
+    font-size: 4em;
+    font-family: 'News Cycle', sans-serif;
+    color: #2977c9;
+    font-weight: 700;
+    /*width: 55%;*/
+    z-index: 3;
+}
+
+.hero-section .hero-image img {
+    z-index: 1;
+    border-radius: 50%;
+    width: auto;
+    height: 25em;
+    /*position: absolute;*/
+    /*top: 6em;*/
+    /*right: 6em;*/
+    margin-top: 4em;
+    filter: grayscale(0.4);
+    border-color: #2977c9;
+    border-width: 1px;
+    border-style: solid;
+}
+/*.root {
+    width: 100vw;
+    overflow-x: hidden;
+}
+
+nav {
+    padding-left: 4vw;
+    padding-right: 4vw;
+}
+
+section {
+    padding-left: 4vw;
+    padding-right: 4vw;
+}
+
+
+
+@media only screen and (min-width: 768px) {
+    nav {
+        padding-left: 15vw;
+        padding-right: 15vw;
+    }
+
+    section {
+        padding-left: 15vw;
+        padding-right: 15vw;
+    }
+
+    .root {
+        font-size: 32px;
+    }
+}*/
+
+    /*.container {
+    width: 70vw;
+    margin: auto;
+}*/
+
+/*.main-nav {
+    background-color: white;
+    display: flex;
+    padding-top: 1em;
+    padding-bottom: 1em;
+}
+
+.main-nav .logo {
+    font-size: 1.6em;
+    font-weight: 400;
+}
+
+.main-nav .logo .linked {
+    color: #2977c9;
+    padding: 4px;
+    padding-right: 0;
+}
+
+.main-nav .logo .out {
+    background-color: #2977c9;
+    color: white;
+    border-radius: 4px;
+    padding: 4px;
+}
+
+.main-nav .grow {
+flex-grow: 1
+}
+
+.hero {
+    background-color: white;
+    padding-top: 4em;
+    padding-bottom: 4em;
+    position: relative;
+    height: 30vh;
+    overflow-y: visible;
+}
+
+.hero h1 {
+    font-size: 3em;
+    font-family: 'News Cycle', sans-serif;
+    color: #2977c9;
+    font-weight: 700;
+    width: 55%;
+    z-index: 3;
+}
+
+.hero img {
+    z-index: 1;
+    border-radius: 50%;
+    width: 30%;
+    height: auto;
+    position: absolute;
+    top: 60px;
+    right: 12vw;
+    filter: grayscale(0.4);
+    border-color: #2977c9;
+    border-width: 1px;
+    border-style: solid;
+}
+
+.hero h1 .void {
+    font-family: 'Permanent Marker', cursive;
+    font-weight: 400;
+}
+
+.details {
+    width: 100vw;
+    padding-top: 3em;
+    min-height: 450px;
+    color: #767676;
+}*/

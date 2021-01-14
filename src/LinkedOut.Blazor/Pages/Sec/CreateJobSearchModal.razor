@@ -1,0 +1,106 @@
+﻿@using LinkedOut.Application.Features.JobSearches.Commands
+@using System.ComponentModel.DataAnnotations
+
+@inject IMediator _mediator; 
+@inject ICurrentUserService _currentUserService;
+
+@{
+    RenderFragment footer = @<Template>
+        <Button OnClick="@HandleOk" @key="@( "submit" )"
+                HtmlType="submit"
+                Type="@ButtonType.Primary"
+                Loading="@_loading">
+            Create
+        </Button>
+        <Button OnClick="@HandleCancel" @key="@( "back" )">Cancel</Button>
+    </Template>;
+}
+
+<Modal Title="Create a job search"
+       Visible="@_isVisible"
+       OnOk="@HandleOk"
+       OnCancel="@HandleCancel"
+
+       Footer="@footer">
+    <Form Model="@model"
+          @ref="form"
+          LabelColSpan="8"
+          WrapperColSpan="16">
+        <FormItem Label="Title">
+            <Input @bind-Value="@context.Title" />
+        </FormItem>
+        <FormItem Label="Created on">
+            <DatePicker TValue="DateTime" Picker="@DatePickerType.Date"  @bind-Value="@context.CreatedOn" />
+        </FormItem>
+    </Form>
+</Modal>
+
+
+
+@code{
+
+    public bool _isVisible { get; set; } = false;
+
+    [Parameter]
+    public EventCallback OnClose { get; set; }
+
+    bool _loading = false;
+
+    private async Task HandleOk(MouseEventArgs e)
+    {
+        if (form.Validate())
+        {
+            _loading = true;
+            StateHasChanged();
+            var command = new AddJobSearchCommand
+            {
+                CreatedOn = model.CreatedOn,
+                OwnerId = _currentUserService.UserId,
+                Title = model.Title
+            };
+
+            var result = await _mediator.Send(command);
+            _loading = false;
+            StateHasChanged();
+            if (result.IsSuccess)
+            {
+                await Finally();
+            }
+        }
+
+        Console.WriteLine(e);
+    }
+
+    private async Task HandleCancel(MouseEventArgs e)
+    {
+        Console.WriteLine(e);
+        await Finally();
+    }
+
+    private async Task Finally()
+    {
+        _isVisible = false;
+        if (OnClose.HasDelegate)
+        {
+            await OnClose.InvokeAsync();
+        }
+    }
+
+    public void Show()
+    {
+        _isVisible = true;
+    }
+
+    private Form<CreateJobSearchFormModel> form;
+    private CreateJobSearchFormModel model = new();
+
+    public class CreateJobSearchFormModel
+    {
+        [Required]
+        public DateTime CreatedOn { get; set; } = DateTime.Now;
+
+        [Required]
+        [MinLength(3, ErrorMessage = "A title must have a minimum of 2 characters")]
+        public string Title { get; set; }
+    }
+}

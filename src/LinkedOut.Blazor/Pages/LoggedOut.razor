@@ -1,0 +1,29 @@
+﻿@inject NavigationManager _navigationManager
+
+<div style="min-height: 300px; display: flex; align-items: center; justify-content: center; flex-direction: column;">
+    <h1>Like getting hired for your dream job, you are not authorized to see this content.</h1>
+    <p>You will be redirected after @_seconds seconds...</p>
+</div>
+
+@code  {
+
+    int _seconds = 5;
+    protected override void OnAfterRender(bool firstRender)
+    {
+        DoCountdown();
+        base.OnAfterRender(firstRender);
+    }
+
+    private async Task DoCountdown()
+    {
+        while (_seconds > 0)
+        {
+            System.Threading.Thread.Sleep(1000);
+            --_seconds;
+            StateHasChanged();
+        }
+
+        _navigationManager.NavigateTo("/logout", true);
+    }
+
+}

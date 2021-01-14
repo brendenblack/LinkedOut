@@ -1,0 +1,5 @@
+﻿.root {
+    background: #fff;
+    padding: var(--content-padding); 
+    min-height: 280px;
+}

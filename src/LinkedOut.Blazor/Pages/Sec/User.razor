@@ -1,0 +1,43 @@
+﻿@page "/user"
+
+@inject AuthenticationStateProvider _auth
+@inject ICurrentUserService _currentUserService;
+
+<h3>User</h3>
+
+<p>Hello @Username</p>
+<Paragraph>
+    <Text Type="secondary">Is authenticated? @_currentUserService.IsAuthenticated</Text>
+</Paragraph>
+<Paragraph>
+    <Text Type="secondary">UserId: @_currentUserService.UserId</Text>
+</Paragraph>
+
+@if (authState != null)
+{
+    <AntList Bordered DataSource="@authState.User.Claims" TItem="System.Security.Claims.Claim">
+        <Header>Claims</Header>
+        <ChildContent>
+            <ListItem>
+                <span><Text Strong>@context.Value</Text> <Text Type="secondary">@context.Type</Text></span>
+            </ListItem>
+        </ChildContent>
+    </AntList>
+
+}
+
+@code {
+
+    private string Username = "Anonymous User";
+
+    private AuthenticationState authState;
+
+    protected override async Task OnInitializedAsync()
+    {
+        authState = await _auth.GetAuthenticationStateAsync();
+
+        Username = _currentUserService.FirstName;
+
+        await base.OnInitializedAsync();
+    }
+}

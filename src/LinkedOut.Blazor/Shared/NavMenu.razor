@@ -1,47 +1,97 @@
 ﻿@inject ICurrentUserService _currentUser
 
-<div class="top-row pl-4 navbar navbar-dark">
-    <a class="navbar-brand" href="">LinkedOut</a>
-    <button class="navbar-toggler" @onclick="ToggleNavMenu">
-        <span class="navbar-toggler-icon"></span>
-    </button>
-</div>
-
-<div class="@NavMenuCssClass" @onclick="ToggleNavMenu">
-    <ul class="nav flex-column">
-        <li class="nav-item px-3">
-            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="oi oi-home" aria-hidden="true"></span> Home
-            </NavLink>
-        </li>
-        <li class="nav-item px-3">
-            <NavLink class="nav-link" href="counter">
-                <span class="oi oi-plus" aria-hidden="true"></span> Counter
-            </NavLink>
-        </li>
-        <li class="nav-item px-3">
-            <NavLink class="nav-link" href="fetchdata">
-                    <span class="oi @_icon" aria-hidden="true"></span> Fetch data
-            </NavLink>
-        </li>
-    </ul>
-</div>
+<Header Style="display: flex; flex-direction: row; z-index:1; width: 100%; position: fixed;">
+    <div class="logo">
+        <a href="/">LinkedOut</a>
+    </div>
+    @if (_currentUser.IsAuthenticated)
+    {
+        <Menu Mode="MenuMode.Horizontal" Theme="MenuTheme.Dark" >
+            <SubMenu Title="Job searches">
+                <MenuItem Key="mysearches"><MenuLink href="/sec/jobsearch">My searches</MenuLink></MenuItem>
+                <MenuItemGroup Title="Recent searches">
+                    @*<MenuItem Key="search1">Job Search 2020</MenuItem>*@
+                </MenuItemGroup>
+            </SubMenu>
+        </Menu>
+        <span style="flex-grow: 1;"></span>
+        <Menu Theme="MenuTheme.Dark" Mode="MenuMode.Horizontal">
+            <SubMenu TitleTemplate="@userSubmenuTitle">
+                <MenuItem Key="settings"><MenuLink Href="/user">Settings</MenuLink></MenuItem>
+                <Divider />
+                <MenuItem Key="logout"><MenuLink Href="/logout">Sign out</MenuLink></MenuItem>
+            </SubMenu>
+        </Menu>
+    }
+    else
+    {
+        <span style="flex-grow: 1;"></span>
+        <Menu Theme="MenuTheme.Dark" Mode="MenuMode.Horizontal">
+            <MenuItem Key="register" Disabled>
+                <Tooltip Title="@("Registration is currently closed")">Register</Tooltip></MenuItem>
+            <MenuItem Key="login">
+                <MenuLink Href="/login"><Icon Type="login" Theme="outline" /> Sign in</MenuLink>
+            </MenuItem>
+        </Menu>
+    }
+</Header>
 
 @code {
-    private bool collapseNavMenu = true;
+    RenderFragment userSubmenuTitle;
 
-    private string NavMenuCssClass => collapseNavMenu ? "collapse" : null;
-
-    private string _icon = "oi-lock-locked";
-
-    protected override void OnAfterRender(bool firstRender)
+    protected override void OnParametersSet()
     {
-        _icon = (_currentUser.IsAuthenticated) ? "oi-lock-unlocked" : "oi-lock-locked";
-        base.OnAfterRender(firstRender);
-    }
+        userSubmenuTitle =@<Template>
+            <Avatar Size="medium" Icon="user" />
+        </Template>;
 
-    private void ToggleNavMenu()
-    {
-        collapseNavMenu = !collapseNavMenu;
+        base.OnParametersSet();
     }
 }
+
+
+@*<div class="top-row pl-4 navbar navbar-dark">
+        <a class="navbar-brand" href="">LinkedOut</a>
+        <button class="navbar-toggler" @onclick="ToggleNavMenu">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+    </div>
+
+    <div class="@NavMenuCssClass" @onclick="ToggleNavMenu">
+        <ul class="nav flex-column">
+            <li class="nav-item px-3">
+                <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+                    <span class="oi oi-home" aria-hidden="true"></span> Home
+                </NavLink>
+            </li>
+            <li class="nav-item px-3">
+                <NavLink class="nav-link" href="counter">
+                    <span class="oi oi-plus" aria-hidden="true"></span> Counter
+                </NavLink>
+            </li>
+            <li class="nav-item px-3">
+                <NavLink class="nav-link" href="fetchdata">
+                        <span class="oi @_icon" aria-hidden="true"></span> Fetch data
+                </NavLink>
+            </li>
+        </ul>
+    </div>
+
+    @code {
+        private bool collapseNavMenu = true;
+
+        private string NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+
+        private string _icon = "oi-lock-locked";
+
+        protected override void OnAfterRender(bool firstRender)
+        {
+            _icon = (_currentUser.IsAuthenticated) ? "oi-lock-unlocked" : "oi-lock-locked";
+            base.OnAfterRender(firstRender);
+        }
+
+        private void ToggleNavMenu()
+        {
+            collapseNavMenu = !collapseNavMenu;
+        }
+    }*@
