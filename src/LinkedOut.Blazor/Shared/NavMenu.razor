@@ -8,18 +8,18 @@
     {
         <Menu Mode="MenuMode.Horizontal" Theme="MenuTheme.Dark" >
             <SubMenu Title="Job searches">
-                <MenuItem Key="mysearches"><a href="/sec/jobsearch">My searches</a></MenuItem>
+                <MenuItem Key="mysearches"><MenuLink href="/sec/jobsearch">My searches</MenuLink></MenuItem>
                 <MenuItemGroup Title="Recent searches">
-                    <MenuItem Key="search1">Job Search 2020</MenuItem>
+                    @*<MenuItem Key="search1">Job Search 2020</MenuItem>*@
                 </MenuItemGroup>
             </SubMenu>
         </Menu>
         <span style="flex-grow: 1;"></span>
         <Menu Theme="MenuTheme.Dark" Mode="MenuMode.Horizontal">
             <SubMenu TitleTemplate="@userSubmenuTitle">
-                <MenuItem Key="settings"><a href="/usersettings">Settings</a></MenuItem>
+                <MenuItem Key="settings"><MenuLink Href="/user">Settings</MenuLink></MenuItem>
                 <Divider />
-                <MenuItem Key="logout"><a href="/logout">Sign out</a></MenuItem>
+                <MenuItem Key="logout"><MenuLink Href="/logout">Sign out</MenuLink></MenuItem>
             </SubMenu>
         </Menu>
     }
@@ -27,8 +27,11 @@
     {
         <span style="flex-grow: 1;"></span>
         <Menu Theme="MenuTheme.Dark" Mode="MenuMode.Horizontal">
-            <MenuItem Key="register"><a href="register">Register</a></MenuItem>
-            <MenuItem Key="login"><a href="/login"><Icon Type="login" Theme="outline" /> Sign in</a></MenuItem>
+            <MenuItem Key="register" Disabled>
+                <Tooltip Title="@("Registration is currently closed")">Register</Tooltip></MenuItem>
+            <MenuItem Key="login">
+                <MenuLink Href="/login"><Icon Type="login" Theme="outline" /> Sign in</MenuLink>
+            </MenuItem>
         </Menu>
     }
 </Header>

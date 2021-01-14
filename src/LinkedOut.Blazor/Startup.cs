@@ -36,7 +36,6 @@ namespace LinkedOut.Blazor
 
             services.AddSingleton<IConfiguration>(Configuration);
 
-
             services.AddRazorPages();
             services.AddServerSideBlazor();
             services.AddAntDesign();
@@ -45,7 +44,6 @@ namespace LinkedOut.Blazor
                 options.ForwardedHeaders =
                     ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
             });
-            services.AddSingleton<WeatherForecastService>();
 
             services.AddLinkedOut();
             services.AddInfrastructure(Configuration);
@@ -127,8 +125,8 @@ namespace LinkedOut.Blazor
             app.UseHttpsRedirection();
             app.UseStaticFiles();
 
+            app.UseAuthentication();
             app.UseRouting();
-            app.UseAuthentication();          
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapBlazorHub();

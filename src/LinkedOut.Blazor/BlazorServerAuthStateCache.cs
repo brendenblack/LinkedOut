@@ -8,9 +8,9 @@ namespace LinkedOut.Blazor
 {
     public class BlazorServerAuthStateCache
     {
-        private ConcurrentDictionary<string, BlazorServerAuthData> Cache = new ();
+        private ConcurrentDictionary<string, BlazorServerAuthData> _cache = new ();
 
-        public bool HasSubjectId(string subjectId) => Cache.ContainsKey(subjectId);
+        public bool HasSubjectId(string subjectId) => _cache.ContainsKey(subjectId);
 
         public void Add(string subjectId, DateTimeOffset expiration, string accessToken, string refreshToken)
         {
@@ -21,18 +21,18 @@ namespace LinkedOut.Blazor
                 AccessToken = accessToken,
                 RefreshToken = refreshToken
             };
-            Cache.AddOrUpdate(subjectId, data, (k, v) => data);
+            _cache.AddOrUpdate(subjectId, data, (k, v) => data);
         }
 
         public BlazorServerAuthData Get(string subjectId)
         {
-            Cache.TryGetValue(subjectId, out var data);
+            _cache.TryGetValue(subjectId, out var data);
             return data;
         }
 
         public void Remove(string subjectId)
         {
-            Cache.TryRemove(subjectId, out _);
+            _cache.TryRemove(subjectId, out _);
         }
     }
 }

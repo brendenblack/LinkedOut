@@ -9,25 +9,30 @@ using System.Threading.Tasks;
 
 namespace LinkedOut.Blazor.Services
 {
+    /// <summary>
+    /// Retrieves details about the currently authenticated user.
+    /// </summary>
+    /// <remarks>
+    /// Uses <see cref="AuthenticationStateProvider"/>, because Blazor does not populate <see cref="HttpContext"/> when the application is deployed.
+    /// See <a href="https://mcguirev10.com/2019/12/16/blazor-login-expiration-with-openid-connect.html">this blog post</a> for more details.
+    /// </remarks>
     public class OidcCurrentUserService : ICurrentUserService
     {
-        private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly AuthenticationStateProvider _authenticationStateProvider;
 
-        public OidcCurrentUserService(IHttpContextAccessor httpContextAccessor, AuthenticationStateProvider authenticationStateProvider)
+        public OidcCurrentUserService(AuthenticationStateProvider authenticationStateProvider)
         {
-            _httpContextAccessor = httpContextAccessor;
             _authenticationStateProvider = authenticationStateProvider;
         }
 
-        public string UserId => _httpContextAccessor.HttpContext?.User?.FindFirstValue(ClaimTypes.NameIdentifier);
+        public string UserId => _authenticationStateProvider.GetAuthenticationStateAsync().Result.User?.FindFirstValue(ClaimTypes.NameIdentifier);
 
-        public bool IsAuthenticated => _httpContextAccessor.HttpContext?.User?.Identity?.IsAuthenticated ?? false;
+        public bool IsAuthenticated => _authenticationStateProvider.GetAuthenticationStateAsync().Result.User?.Identity?.IsAuthenticated ?? false;
 
-        public string FirstName => _httpContextAccessor.HttpContext?.User?.FindFirstValue(ClaimTypes.GivenName) ?? "";
+        public string FirstName => _authenticationStateProvider.GetAuthenticationStateAsync().Result.User?.FindFirstValue(ClaimTypes.GivenName) ?? "";
 
-        public string LastName => _httpContextAccessor.HttpContext?.User?.FindFirstValue(ClaimTypes.Surname) ?? "";
+        public string LastName => _authenticationStateProvider.GetAuthenticationStateAsync().Result.User?.FindFirstValue(ClaimTypes.Surname) ?? "";
 
-        public string Email => _httpContextAccessor.HttpContext?.User?.FindFirstValue(ClaimTypes.Email) ?? "";
+        public string Email => _authenticationStateProvider.GetAuthenticationStateAsync().Result.User?.FindFirstValue(ClaimTypes.Email) ?? "";
     }
 }

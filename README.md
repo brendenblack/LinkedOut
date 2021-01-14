@@ -10,6 +10,13 @@ LinkedOut can help you keep track of all of the fruitless applications you submi
 ## Technology stack
 LinkedOut was built with [server-side Blazor]("https://dotnet.microsoft.com/apps/aspnet/web-apps/blazor") as the UI on top of patterns informed mostly by Jason Taylor's [Clean Architecture](https://github.com/jasontaylordev/CleanArchitecture/tree/main/src).
 
+### Authentication
+The app is built to authenticate with an OIDC authority. I happen to be developing against Keycloak but it doesn't matter too much. The following blog posts were instrumental
+in figuring out how to wire up authentication:
+
+1. [Blazor Authentication with OpenID Connect](https://mcguirev10.com/2019/12/15/blazor-authentication-with-openid-connect.html)
+1. [Blazor Login Expiration with OpenID Connect](https://mcguirev10.com/2019/12/16/blazor-login-expiration-with-openid-connect.html)
+
 
 ## Setting up the dev environment
 1. Set up database access

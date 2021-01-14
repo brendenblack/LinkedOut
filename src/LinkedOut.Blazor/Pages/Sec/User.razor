@@ -36,11 +36,7 @@
     {
         authState = await _auth.GetAuthenticationStateAsync();
 
-        Username =
-            authState.User.Claims
-            .Where(c => c.Type.Equals("name"))
-            .Select(c => c.Value)
-            .FirstOrDefault() ?? string.Empty;
+        Username = _currentUserService.FirstName;
 
         await base.OnInitializedAsync();
     }
