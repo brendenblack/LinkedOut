@@ -5,6 +5,7 @@ using LinkedOut.Blazor.Services;
 using LinkedOut.Infrastructure;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpOverrides;
@@ -18,9 +19,12 @@ namespace LinkedOut.Blazor
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        private readonly IWebHostEnvironment _hostingEnvironment;
+
+        public Startup(IConfiguration configuration, IWebHostEnvironment hostingEnvironment)
         {
             Configuration = configuration;
+            _hostingEnvironment = hostingEnvironment;
         }
 
         public IConfiguration Configuration { get; }
@@ -35,6 +39,7 @@ namespace LinkedOut.Blazor
 
             services.AddRazorPages();
             services.AddServerSideBlazor();
+            services.AddAntDesign();
             services.Configure<ForwardedHeadersOptions>(options =>
             {
                 options.ForwardedHeaders =
@@ -67,7 +72,16 @@ namespace LinkedOut.Blazor
                 options.GetClaimsFromUserInfoEndpoint = Configuration.GetSection("Auth").GetValue<bool>("GetClaimsFromUserInfoEndpoint", true);
                 options.Scope.Add("openid");
                 options.Scope.Add("profile");
-                
+                options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+                {
+                    NameClaimType = "email",
+                };
+
+                if (_hostingEnvironment.IsDevelopment())
+                {
+                    options.RequireHttpsMetadata = false;
+                }
+
                 options.Events = new OpenIdConnectEvents
                 {
                     OnAccessDenied = context =>
@@ -88,7 +102,11 @@ namespace LinkedOut.Blazor
             });
 
             services.AddHttpContextAccessor();
-            services.AddTransient<ICurrentUserService, CurrentUserService>();
+            services.AddTransient<ICurrentUserService, OidcCurrentUserService>();
+
+            services.AddSingleton<BlazorServerAuthStateCache>();
+            services.AddScoped<AuthenticationStateProvider, BlazorServerAuthState>();
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -109,10 +127,8 @@ namespace LinkedOut.Blazor
             app.UseHttpsRedirection();
             app.UseStaticFiles();
 
-            app.UseAuthentication();
-
             app.UseRouting();
-
+            app.UseAuthentication();          
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapBlazorHub();

@@ -3,15 +3,15 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30804.86
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LinkedOut.Domain", "src\LinkedOut.Domain\LinkedOut.Domain.csproj", "{F24EECAE-3983-45B8-B73D-20052CF3AA2A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LinkedOut.Domain", "src\LinkedOut.Domain\LinkedOut.Domain.csproj", "{F24EECAE-3983-45B8-B73D-20052CF3AA2A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LinkedOut.Domain.UnitTests", "test\LinkedOut.Domain.UnitTests\LinkedOut.Domain.UnitTests.csproj", "{A11C9269-73A9-4360-93D3-9B1E38FA0CF7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LinkedOut.Domain.UnitTests", "test\LinkedOut.Domain.UnitTests\LinkedOut.Domain.UnitTests.csproj", "{A11C9269-73A9-4360-93D3-9B1E38FA0CF7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LinkedOut.Blazor", "src\LinkedOut.Blazor\LinkedOut.Blazor.csproj", "{B8321EFA-B458-4A58-A3FE-92DA249051A4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LinkedOut.Blazor", "src\LinkedOut.Blazor\LinkedOut.Blazor.csproj", "{B8321EFA-B458-4A58-A3FE-92DA249051A4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LinkedOut.Application", "src\LinkedOut.Application\LinkedOut.Application.csproj", "{6C097F3F-841D-4860-BBEC-0FAB399B584D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LinkedOut.Application", "src\LinkedOut.Application\LinkedOut.Application.csproj", "{6C097F3F-841D-4860-BBEC-0FAB399B584D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LinkedOut.Infrastructure", "src\LinkedOut.Infrastructure\LinkedOut.Infrastructure.csproj", "{55F78959-3F93-4C11-B300-A57A4B731D92}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LinkedOut.Infrastructure", "src\LinkedOut.Infrastructure\LinkedOut.Infrastructure.csproj", "{55F78959-3F93-4C11-B300-A57A4B731D92}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -9,5 +9,11 @@ namespace LinkedOut.Application.Common.Interfaces
         string UserId { get; }
 
         bool IsAuthenticated { get; }
+
+        string FirstName { get; }
+
+        string Email { get; }
+
+
     }
 }

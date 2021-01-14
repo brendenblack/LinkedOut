@@ -1,8 +1,9 @@
 ﻿@inject NavigationManager _navigationManager
 
+
 <Router AppAssembly="@typeof(Program).Assembly">
     <Found Context="routeData">
-        <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)">
+        <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(Pages.Sec.SecureAreaLayout)">
             <NotAuthorized>
                 <h1>Not authorized</h1>
                 <p>You are not authorized to reach this page. You are being redirected to the login page...</p>
@@ -14,16 +15,19 @@
                 }
             </NotAuthorized>
             <Authorizing>
-                <h1>Authentication in progress</h1>
+                <h1>Authentication in progress...</h1>
             </Authorizing>
         </AuthorizeRouteView>
     </Found>
     <NotFound>
         <CascadingAuthenticationState>
-            <LayoutView Layout="@typeof(MainLayout)">
-                <h1>Sorry</h1>
-                <p>Sorry, there's nothing at this address.</p>
+            <LayoutView Layout="@typeof(PublicLayout)">
+                <div style="display: flex; width: 100%; height: 100%; justify-content: center; align-items: center;">
+                    <h1>Like a fit for you at your dream company, nothing was found at this address.</h1>
+                </div>
             </LayoutView>
         </CascadingAuthenticationState>
     </NotFound>
 </Router>
+
+<AntContainer />
