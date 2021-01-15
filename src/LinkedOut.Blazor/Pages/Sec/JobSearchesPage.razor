@@ -1,0 +1,79 @@
+﻿@page "/sec"
+@page "/sec/jobsearch"
+
+@using LinkedOut.Application.Features.JobSearches.Queries.GetJobSearchesForUser
+
+@inject IMediator _mediator
+@inject ICurrentUserService _currentUserService
+
+
+<Content Class="container">
+    <div class="root">
+        <Space Direction="vertical" Size="large" Style="width: 100%;">
+            <SpaceItem>
+                <Button Icon="plus" OnClick=@(() => handleCreateJobSearchClick()) Type="@ButtonType.Primary">Create search</Button>
+            </SpaceItem>
+
+            <SpaceItem>
+                @if (_jobSearches.Count == 0)
+                {
+                    <Alert Message="You have not created any job searches" Type="@AlertType.Info" />
+                }
+                else
+                {
+                    <Table TItem="JobSearchSummaryDto" DataSource="@_jobSearches">
+                        <Column @bind-Field="@context.Title">
+                            <a href=@(Routes.MakeJobSearchUrl(context.Id))>@context.Title</a>
+                        </Column>
+                        <Column @bind-Field="@context.Created">
+                            @context.Created.ToShortDateString()
+                        </Column>
+                        <Column @bind-Field="@context.ApplicationsCount"></Column>
+                        @*<ActionColumn Title="Action">
+                    <Space Size="middle">
+                        <SpaceItem>
+                            <a>Delete</a>
+                        </SpaceItem>
+                    </Space>
+                </ActionColumn>*@
+                    </Table>
+                }
+            </SpaceItem>
+        </Space>
+    </div>
+</Content>
+
+<CreateJobSearchModal 
+    @ref="createJobSearchModal"
+ />
+
+@code {
+    public void handleCreateJobSearchClick()
+    {
+        createJobSearchModal.Show();
+    }
+
+    CreateJobSearchModal createJobSearchModal;
+
+    private List<JobSearchSummaryDto> _jobSearches = new List<JobSearchSummaryDto>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var vm = await _mediator.Send(new GetJobSearchesForUserQuery { UserId = _currentUserService.UserId });
+        _jobSearches = vm.JobSearches;
+
+
+        //    _jobSearches = new List<JobSearchSummaryDto>
+        //{
+        //        new JobSearchSummaryDto
+        //        {
+        //            Title = "My first job hunt",
+        //            ApplicationsCount = 0,
+        //            CreatedOn = DateTime.Now,
+        //            Id = 0
+        //        }
+        //    };
+
+        await base.OnInitializedAsync();
+    }
+}

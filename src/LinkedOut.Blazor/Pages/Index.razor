@@ -1,24 +1,39 @@
 ﻿@page "/"
+@layout PublicLayout
 @inject AuthenticationStateProvider _authState
+@inject NavigationManager _navigationManager
 
-<h1>Hello, @_username!</h1>
+<Content Style="height: 100%;">
+    <div class="hero-section">
+        <div class="hero-header">
+            <h1>Keep track<br />while submitting your resumé<br />to the void</h1>
+        </div>
+        <div class="hero-image">
+            <img src="/images/pexels-ketut-subiyanto-4560150.jpg" />
+        </div>
+    </div>
+</Content>
 
-Welcome to your new app.
-
-
-@code
+    @code
 {
-    private string _username;
+        private string _username;
 
-    protected override async Task OnInitializedAsync()
-    {
-        var state = await _authState.GetAuthenticationStateAsync();
+        private string _logoLink = "/";
 
-        _username = state.User.Claims
-            .Where(c => c.Type.Equals("name"))
-            .Select(c => c.Value)
-            .FirstOrDefault() ?? "anonymous user";
+        protected override async Task OnInitializedAsync()
+        {
+            var state = await _authState.GetAuthenticationStateAsync();
 
-        await base.OnInitializedAsync();
+            //if (state.User != null)
+            //{
+            //    _navigationManager.NavigateTo($"/sec", forceLoad: true);
+            //}
+
+            _username = state.User.Claims
+                .Where(c => c.Type.Equals("name"))
+                .Select(c => c.Value)
+                .FirstOrDefault() ?? "anonymous user";
+
+            await base.OnInitializedAsync();
+        }
     }
-}

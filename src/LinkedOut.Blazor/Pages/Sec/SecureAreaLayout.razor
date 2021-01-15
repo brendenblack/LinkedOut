@@ -1,0 +1,30 @@
+﻿@inherits LayoutComponentBase
+@inject ICurrentUserService _currentUserService
+
+@{
+    RenderFragment sub1Title =
+    @<Template>
+        <Icon Type="setting" Theme="outline"></Icon>
+    </Template>;
+}
+<Layout Class="layout" Style="height: 100%">
+    <NavMenu />
+
+    <div Style="padding: 0; margin-top: 64px; height: 100%">
+        @Body
+    </div>
+
+    <Footer Style="text-align: center; ">LinkedOut - submitting resumés to the void.</Footer>
+</Layout>
+
+@code {      
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (!_currentUserService.IsAuthenticated)
+        {
+            // TODO: redirect
+        }
+        base.OnAfterRender(firstRender);
+    }
+}

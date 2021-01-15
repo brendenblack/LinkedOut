@@ -1,9 +1,6 @@
 ﻿using LinkedOut.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace LinkedOut.Application.Common.Interfaces
@@ -13,5 +10,7 @@ namespace LinkedOut.Application.Common.Interfaces
         public DbSet<JobApplication> JobApplications { get; }
 
         public DbSet<JobSearch> JobSearches { get; }
+
+        Task<int> SaveChangesAsync(CancellationToken cancellationToken);
     }
 }
