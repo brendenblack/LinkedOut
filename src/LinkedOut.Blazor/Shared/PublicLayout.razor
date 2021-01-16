@@ -1,10 +1,16 @@
 ﻿@inherits LayoutComponentBase
+@using System.Reflection
 
 <Layout Class="layout" Style="height: 100%">
     <NavMenu />
     <div Style="padding: 0; margin-top: 64px; height: 100%">
         @Body
     </div>
-    <Footer>
-        </Footer>
+    <Footer Style="text-align: center;">
+        <Text>LinkedOut - submitting resumés to the void</Text><br />
+        <Text Type="secondary">
+        @{ var version = Assembly.GetEntryAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion; }
+        @version
+        </Text>
+    </Footer>
 </Layout>
