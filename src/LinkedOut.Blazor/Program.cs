@@ -55,6 +55,7 @@ namespace LinkedOut.Blazor
                     var env = services.GetService<IHostEnvironment>();
                     if (env.IsDevelopment() || env.IsStaging())
                     {
+                        // we only want to seed the database in staging or lower environments
                         logger.LogInformation($"Starting up in {env.EnvironmentName} environment");
                         var testUserId = services.GetRequiredService<IConfiguration>().GetValue<string>("TestUserId", "");
                         if (string.IsNullOrWhiteSpace(testUserId))

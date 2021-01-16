@@ -1,3 +1,6 @@
+# This Dockerfile is meant to be used by Heroku
+# If you're building locally, use src/LinkedOut.Blazor/Dockerfile instead, providing 
+# the root directory as the context
 FROM mcr.microsoft.com/dotnet/aspnet:5.0-buster-slim AS base
 WORKDIR /app
 
