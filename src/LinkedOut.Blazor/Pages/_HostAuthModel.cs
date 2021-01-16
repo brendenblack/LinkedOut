@@ -25,6 +25,8 @@ namespace LinkedOut.Blazor.Pages
         {
             if (User.Identity.IsAuthenticated)
             {
+                _logger.LogInformation("Get request from authenticated user");
+
                 var sid = User.Claims
                     //.Where(c => c.Type.Equals("sid"))
                     .Where(c => c.Type.Equals(ClaimTypes.NameIdentifier))
@@ -51,6 +53,10 @@ namespace LinkedOut.Blazor.Pages
                 {
                     _logger.LogWarning("An authenticated user is accessing a page without a Subject ID");
                 }
+            }
+            else
+            {
+                _logger.LogDebug("Got request fron unauthenticated user");
             }
 
             return Page();

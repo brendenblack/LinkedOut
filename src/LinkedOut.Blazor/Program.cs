@@ -37,6 +37,8 @@ namespace LinkedOut.Blazor
 
                     if (!context.Database.IsInMemory())
                     {
+                        logger.LogInformation("Starting up with database type {DatabaseType}", context.Database.GetType().Name);
+
                         var scopeDictionary = new Dictionary<string, object>
                         {
                             ["OperationType"] = "dbseed"
@@ -51,13 +53,17 @@ namespace LinkedOut.Blazor
                     }
 
                     var env = services.GetService<IHostEnvironment>();
-                    if (env.IsDevelopment())
+                    if (env.IsDevelopment() || env.IsStaging())
                     {
-                        logger.LogInformation("Starting up in Development environment");
-                        var testUserId = services.GetRequiredService<IConfiguration>().GetValue("TestUserId", Guid.NewGuid().ToString());
+                        logger.LogInformation($"Starting up in {env.EnvironmentName} environment");
+                        var testUserId = services.GetRequiredService<IConfiguration>().GetValue<string>("TestUserId", "");
+                        if (string.IsNullOrWhiteSpace(testUserId))
+                        {
+                            testUserId = Guid.NewGuid().ToString();
+                            logger.LogWarning("No test user id was supplied through a TestUserId configuration value. Using GUID {GUID} instead.", testUserId);
+                        }
                         await ApplicationDbContextSeed.SeedTestData(context, testUserId);
                     }
-                    
                 }
                 catch (Exception ex)
                 {
