@@ -25,6 +25,8 @@ namespace LinkedOut.Blazor.Pages
         {
             if (User.Identity.IsAuthenticated)
             {
+                _logger.LogInformation("Get request from authenticated user");
+
                 var sid = User.Claims
                     //.Where(c => c.Type.Equals("sid"))
                     .Where(c => c.Type.Equals(ClaimTypes.NameIdentifier))
