@@ -35,15 +35,14 @@ namespace LinkedOut.Blazor
         {
 
             services.AddSingleton<IConfiguration>(Configuration);
-
-            services.AddRazorPages();
-            services.AddServerSideBlazor();
-            services.AddAntDesign();
             services.Configure<ForwardedHeadersOptions>(options =>
             {
                 options.ForwardedHeaders =
                     ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
             });
+            services.AddRazorPages();
+            services.AddServerSideBlazor();
+            services.AddAntDesign();
 
             services.AddLinkedOut();
             services.AddInfrastructure(Configuration);
