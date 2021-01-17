@@ -3,6 +3,7 @@ using LinkedOut.Application.Common.Interfaces;
 using LinkedOut.Blazor.Data;
 using LinkedOut.Blazor.Services;
 using LinkedOut.Infrastructure;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Components.Authorization;
@@ -12,6 +13,7 @@ using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
 
@@ -73,27 +75,28 @@ namespace LinkedOut.Blazor
                 options.GetClaimsFromUserInfoEndpoint = Configuration.GetSection("Auth").GetValue<bool>("GetClaimsFromUserInfoEndpoint", true);
                 options.Scope.Add("openid");
                 options.Scope.Add("profile");
+                options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
 
-                options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
-                {
-                    NameClaimType = "email",
-                };
+                //options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+                //{
+                //    NameClaimType = "email",
+                //};
 
-                if (_hostingEnvironment.IsDevelopment())
-                {
-                    options.RequireHttpsMetadata = false;
-                }
+                // sets to false is we're in development environment
+                options.RequireHttpsMetadata = !_hostingEnvironment.IsDevelopment();
 
                 options.Events = new OpenIdConnectEvents
                 {
                     OnAccessDenied = context =>
                     {
+                        Console.WriteLine($"OnAccessDenied to {context.AccessDeniedPath.Value}");
                         context.HandleResponse();
                         context.Response.Redirect("/");
                         return Task.CompletedTask;
                     },
                     OnRemoteFailure = context =>
                     {
+                        Console.WriteLine($"OnRemoteFailure: {context.Failure.Message}");
                         context.HandleResponse();
                         context.Response.Redirect("/");
                         Debug.WriteLine(context.Failure.GetType().FullName);
@@ -130,6 +133,7 @@ namespace LinkedOut.Blazor
             app.UseStaticFiles();
 
             app.UseAuthentication();
+
             app.UseRouting();
             app.UseEndpoints(endpoints =>
             {
