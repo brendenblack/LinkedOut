@@ -76,7 +76,7 @@ namespace LinkedOut.Blazor
                 options.ClientId = Configuration.GetSection("Auth").GetValue<string>("ClientId");
                 options.ClientSecret = Configuration.GetSection("Auth").GetValue<string>("ClientSecret");
                 options.ResponseType = Configuration.GetSection("Auth").GetValue<string>("ResponseType", "code");
-                options.SaveTokens = Configuration.GetSection("Auth").GetValue<bool>("SaveTokens", true);
+                options.SaveTokens = Configuration.GetSection("Auth").GetValue<bool>("SaveTokens", false);
                 options.GetClaimsFromUserInfoEndpoint = Configuration.GetSection("Auth").GetValue<bool>("GetClaimsFromUserInfoEndpoint", true);
                 options.Scope.Add("openid");
                 options.Scope.Add("profile");

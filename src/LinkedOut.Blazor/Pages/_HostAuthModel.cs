@@ -23,6 +23,8 @@ namespace LinkedOut.Blazor.Pages
 
         public async Task<IActionResult> OnGet()
         {
+            _logger.LogDebug("OnGet on host {Host}", HttpContext.Request.Host);
+
             if (User.Identity.IsAuthenticated)
             {
                 _logger.LogInformation("Get request from authenticated user");
@@ -54,10 +56,6 @@ namespace LinkedOut.Blazor.Pages
                     _logger.LogWarning("An authenticated user is accessing a page without a Subject ID");
                 }
             }
-            else
-            {
-                _logger.LogDebug("Got request fron unauthenticated user");
-            }
 
             return Page();
         }
@@ -79,15 +77,15 @@ namespace LinkedOut.Blazor.Pages
         //    return Challenge(authProps, "oidc");
         //}
 
-        //public async Task OnGetLogout()
-        //{
-        //    _logger.LogDebug("Getting logout");
-        //    var authProps = new AuthenticationProperties
-        //    {
-        //        RedirectUri = Url.Content("~/")
-        //    };
-        //    await HttpContext.SignOutAsync("Cookies");
-        //    await HttpContext.SignOutAsync("oidc", authProps);
-        //}
+        public async Task OnGetLogout()
+        {
+            _logger.LogDebug("Getting logout");
+            var authProps = new AuthenticationProperties
+            {
+                RedirectUri = Url.Content("~/")
+            };
+            await HttpContext.SignOutAsync("Cookies");
+            await HttpContext.SignOutAsync("oidc", authProps);
+        }
     }
 }
