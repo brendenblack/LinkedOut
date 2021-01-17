@@ -62,30 +62,32 @@ namespace LinkedOut.Blazor.Pages
             return Page();
         }
 
-        public IActionResult OnGetLogin()
-        {
-            _logger.LogDebug("Getting login");
-            var authProps = new AuthenticationProperties
-            {
-                IsPersistent = true,
-                ExpiresUtc = DateTimeOffset.UtcNow.AddHours(15), 
-                RedirectUri = "https://staging.brendenblack.ca/user" //Url.Content("~/")
-            };
+        //public IActionResult OnGetLogin()
+        //{
+        //    _logger.LogDebug("Getting login");
+        //    var authProps = new AuthenticationProperties
+        //    {
+        //        IsPersistent = true,
+        //        ExpiresUtc = DateTimeOffset.UtcNow.AddHours(15), 
+        //        RedirectUri = "https://staging.brendenblack.ca/user" //Url.Content("~/")
+        //    };
 
-            _logger.LogDebug("Preparing challenge with redirect URI {RedirectUri}", authProps.RedirectUri);
+        //    Microsoft.IdentityModel.Protocols.OpenIdConnect.OpenIdConnectMessage x;
 
-            return Challenge(authProps, "oidc");
-        }
+        //    _logger.LogDebug("Preparing challenge with redirect URI {RedirectUri}", authProps.RedirectUri);
 
-        public async Task OnGetLogout()
-        {
-            _logger.LogDebug("Getting logout");
-            var authProps = new AuthenticationProperties
-            {
-                RedirectUri = Url.Content("~/")
-            };
-            await HttpContext.SignOutAsync("Cookies");
-            await HttpContext.SignOutAsync("oidc", authProps);
-        }
+        //    return Challenge(authProps, "oidc");
+        //}
+
+        //public async Task OnGetLogout()
+        //{
+        //    _logger.LogDebug("Getting logout");
+        //    var authProps = new AuthenticationProperties
+        //    {
+        //        RedirectUri = Url.Content("~/")
+        //    };
+        //    await HttpContext.SignOutAsync("Cookies");
+        //    await HttpContext.SignOutAsync("oidc", authProps);
+        //}
     }
 }

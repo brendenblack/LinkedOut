@@ -54,11 +54,16 @@ namespace LinkedOut.Blazor
             //    options.RedirectStatusCode = StatusCodes.Status307TemporaryRedirect;
             //    options.HttpsPort = 5001;
             //});
+            services.AddAuthorizationCore(opt =>
+            {
+                //opt.
+            });
 
             services.AddAuthentication(options =>
             {
-                options.DefaultScheme = "Cookies";
-                options.DefaultChallengeScheme = "oidc";
+                options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
             })
             .AddCookie("Cookies", opts =>
             {
@@ -77,10 +82,10 @@ namespace LinkedOut.Blazor
                 options.Scope.Add("profile");
                 options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
 
-                //options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
-                //{
-                //    NameClaimType = "email",
-                //};
+                options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+                {
+                    NameClaimType = "email",
+                };
 
                 // sets to false is we're in development environment
                 options.RequireHttpsMetadata = !_hostingEnvironment.IsDevelopment();
@@ -132,9 +137,11 @@ namespace LinkedOut.Blazor
             app.UseHttpsRedirection();
             app.UseStaticFiles();
 
-            app.UseAuthentication();
+            
 
             app.UseRouting();
+            app.UseAuthentication();
+            app.UseAuthorization();
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapBlazorHub();
