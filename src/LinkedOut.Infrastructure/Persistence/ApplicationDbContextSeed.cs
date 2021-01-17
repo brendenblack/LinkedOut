@@ -1,4 +1,5 @@
-﻿using LinkedOut.Domain;
+﻿using LinkedOut.Application.Common.Interfaces;
+using LinkedOut.Domain;
 using LinkedOut.Domain.Entities;
 using LinkedOut.Domain.Models;
 using LinkedOut.Domain.ValueObjects;
@@ -12,7 +13,7 @@ namespace LinkedOut.Infrastructure.Persistence
 {
     public class ApplicationDbContextSeed
     {
-        public static async Task SeedTestData(ApplicationDbContext context, string seedUserId)
+        public static async Task SeedTestData(IApplicationDbContext context, string seedUserId)
         {
             if (!context.JobSearches.Any())
             {
@@ -50,7 +51,7 @@ namespace LinkedOut.Infrastructure.Persistence
                 application2.RecordEmployerContact("No thanks. Don't call us.", "Tim Apple", "Your rejection");
                 context.JobApplications.Add(application2);
 
-                await context.SaveChangesAsync();
+                await context.SaveChangesAsync(new System.Threading.CancellationToken());
             }
         }
     }

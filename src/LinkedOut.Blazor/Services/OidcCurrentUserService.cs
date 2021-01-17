@@ -25,7 +25,23 @@ namespace LinkedOut.Blazor.Services
             _authenticationStateProvider = authenticationStateProvider;
         }
 
-        public string UserId => _authenticationStateProvider.GetAuthenticationStateAsync().Result.User?.FindFirstValue(ClaimTypes.NameIdentifier);
+        // hack to allow seeding the database to work
+        public string UserIdOverride { get; set; }
+
+        public string UserId
+        {
+            get
+            {
+                try
+                {
+                    return _authenticationStateProvider.GetAuthenticationStateAsync().Result.User?.FindFirstValue(ClaimTypes.NameIdentifier);
+                }
+                catch (Exception)
+                {
+                    return "";
+                }
+            }
+        }
 
         public bool IsAuthenticated => _authenticationStateProvider.GetAuthenticationStateAsync().Result.User?.Identity?.IsAuthenticated ?? false;
 
@@ -34,5 +50,6 @@ namespace LinkedOut.Blazor.Services
         public string LastName => _authenticationStateProvider.GetAuthenticationStateAsync().Result.User?.FindFirstValue(ClaimTypes.Surname) ?? "";
 
         public string Email => _authenticationStateProvider.GetAuthenticationStateAsync().Result.User?.FindFirstValue(ClaimTypes.Email) ?? "";
+
     }
 }

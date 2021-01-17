@@ -12,18 +12,13 @@ using System.Threading.Tasks;
 
 namespace LinkedOut.Infrastructure.Persistence
 {
-    public class MyDbContext : ApplicationDbContext
-    {
-        public MyDbContext(DbContextOptions<MyDbContext> options) : base(options, null, null) { }
-    }
-
-    public abstract class ApplicationDbContext : DbContext, IApplicationDbContext
+    public class SqlServerApplicationDbContext : DbContext, IApplicationDbContext
     {
         private readonly ICurrentUserService _currentUserService;
         private readonly IDateTime _dateTime;
 
-        public ApplicationDbContext(
-            DbContextOptions options,
+        public SqlServerApplicationDbContext(
+            DbContextOptions<SqlServerApplicationDbContext> options,
             ICurrentUserService currentUserService,
             IDateTime dateTime) : base(options)
         {
