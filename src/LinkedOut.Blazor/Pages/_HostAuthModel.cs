@@ -68,8 +68,8 @@ namespace LinkedOut.Blazor.Pages
             var authProps = new AuthenticationProperties
             {
                 IsPersistent = true,
-                ExpiresUtc = DateTimeOffset.UtcNow.AddHours(15), // TODO: provide a sensible value, or from config
-                RedirectUri = Url.Content("~/")
+                ExpiresUtc = DateTimeOffset.UtcNow.AddHours(15), 
+                RedirectUri = "https://staging.brendenblack.ca/user" //Url.Content("~/")
             };
             return Challenge(authProps, "oidc");
         }
