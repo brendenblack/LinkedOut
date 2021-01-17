@@ -38,7 +38,7 @@ namespace LinkedOut.Blazor
             services.Configure<ForwardedHeadersOptions>(options =>
             {
                 options.ForwardedHeaders =
-                    ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+                    ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedHost;
             });
             services.AddRazorPages();
             services.AddServerSideBlazor();
@@ -73,6 +73,7 @@ namespace LinkedOut.Blazor
                 options.GetClaimsFromUserInfoEndpoint = Configuration.GetSection("Auth").GetValue<bool>("GetClaimsFromUserInfoEndpoint", true);
                 options.Scope.Add("openid");
                 options.Scope.Add("profile");
+
                 options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
                 {
                     NameClaimType = "email",
