@@ -58,7 +58,11 @@ namespace LinkedOut.Blazor
                 options.DefaultScheme = "Cookies";
                 options.DefaultChallengeScheme = "oidc";
             })
-            .AddCookie("Cookies")
+            .AddCookie("Cookies", opts =>
+            {
+                opts.Cookie.SameSite = SameSiteMode.None;
+                opts.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+            })
             .AddOpenIdConnect("oidc", options =>
             {
                 options.Authority = Configuration.GetSection("Auth").GetValue<string>("Authority");
