@@ -1,26 +1,33 @@
 ﻿@inject NavigationManager _navigationManager
 
+<CascadingAuthenticationState>
+    <Router AppAssembly="@typeof(Program).Assembly">
+        <Found Context="routeData">
+            <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(Pages.Sec.SecureAreaLayout)">
+                <NotAuthorized>
+                    @*@{
+                            var returnUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
 
-<Router AppAssembly="@typeof(Program).Assembly">
-    <Found Context="routeData">
-        <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(Pages.Sec.SecureAreaLayout)">
-            <NotAuthorized>
-               <LinkedOut.Blazor.Pages.LoggedOut />
-            </NotAuthorized>
-            <Authorizing>
-                <h1>Authentication in progress...</h1>
-            </Authorizing>
-        </AuthorizeRouteView>
-    </Found>
-    <NotFound>
-        <CascadingAuthenticationState>
+                            NavigationManager.NavigateTo($"login?redirectUri={returnUrl}", forceLoad: true);
+
+                        }*@
+                    <LinkedOut.Blazor.Pages.LoggedOut />
+                </NotAuthorized>
+                <Authorizing>
+                    <h1>Authentication in progress...</h1>
+                </Authorizing>
+            </AuthorizeRouteView>
+        </Found>
+        <NotFound>
+
             <LayoutView Layout="@typeof(PublicLayout)">
                 <div style="display: flex; width: 100%; height: 100%; justify-content: center; align-items: center;">
                     <h1>Like a fit for you at your dream company, nothing was found at this address.</h1>
                 </div>
             </LayoutView>
-        </CascadingAuthenticationState>
-    </NotFound>
-</Router>
+
+        </NotFound>
+    </Router>
+</CascadingAuthenticationState>
 
 <AntContainer />

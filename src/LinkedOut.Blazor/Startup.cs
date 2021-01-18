@@ -3,6 +3,7 @@ using LinkedOut.Application.Common.Interfaces;
 using LinkedOut.Blazor.Data;
 using LinkedOut.Blazor.Services;
 using LinkedOut.Infrastructure;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Components.Authorization;
@@ -12,6 +13,7 @@ using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
 
@@ -35,15 +37,14 @@ namespace LinkedOut.Blazor
         {
 
             services.AddSingleton<IConfiguration>(Configuration);
-
-            services.AddRazorPages();
-            services.AddServerSideBlazor();
-            services.AddAntDesign();
             services.Configure<ForwardedHeadersOptions>(options =>
             {
                 options.ForwardedHeaders =
-                    ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+                    ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedHost;
             });
+            services.AddRazorPages();
+            services.AddServerSideBlazor();
+            services.AddAntDesign();
 
             services.AddLinkedOut();
             services.AddInfrastructure(Configuration);
@@ -53,46 +54,68 @@ namespace LinkedOut.Blazor
             //    options.RedirectStatusCode = StatusCodes.Status307TemporaryRedirect;
             //    options.HttpsPort = 5001;
             //});
+            //services.AddAuthorizationCore(opt =>
+            //{
+            //    //opt.
+            //});
 
             services.AddAuthentication(options =>
             {
                 options.DefaultScheme = "Cookies";
                 options.DefaultChallengeScheme = "oidc";
+                //options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                //options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                //options.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
             })
-            .AddCookie("Cookies")
+            .AddCookie("Cookies", opts =>
+            {
+                opts.Cookie.SameSite = SameSiteMode.None;
+                opts.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+            })
             .AddOpenIdConnect("oidc", options =>
             {
+                options.SignInScheme = "Cookies";
                 options.Authority = Configuration.GetSection("Auth").GetValue<string>("Authority");
                 options.ClientId = Configuration.GetSection("Auth").GetValue<string>("ClientId");
                 options.ClientSecret = Configuration.GetSection("Auth").GetValue<string>("ClientSecret");
                 options.ResponseType = Configuration.GetSection("Auth").GetValue<string>("ResponseType", "code");
-                options.SaveTokens = Configuration.GetSection("Auth").GetValue<bool>("SaveTokens", true);
+                options.SaveTokens = Configuration.GetSection("Auth").GetValue<bool>("SaveTokens", false);
                 options.GetClaimsFromUserInfoEndpoint = Configuration.GetSection("Auth").GetValue<bool>("GetClaimsFromUserInfoEndpoint", true);
                 options.Scope.Add("openid");
                 options.Scope.Add("profile");
+                options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+
                 options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
                 {
                     NameClaimType = "email",
                 };
 
-                if (_hostingEnvironment.IsDevelopment())
-                {
-                    options.RequireHttpsMetadata = false;
-                }
+                // sets to false is we're in development environment
+                options.RequireHttpsMetadata = !_hostingEnvironment.IsDevelopment();
+
+
 
                 options.Events = new OpenIdConnectEvents
                 {
                     OnAccessDenied = context =>
                     {
+                        Console.WriteLine($"OnAccessDenied to {context.AccessDeniedPath.Value}");
                         context.HandleResponse();
                         context.Response.Redirect("/");
                         return Task.CompletedTask;
                     },
                     OnRemoteFailure = context =>
                     {
+                        Console.WriteLine($"OnRemoteFailure: {context.Failure.Message}");
                         context.HandleResponse();
                         context.Response.Redirect("/");
                         Debug.WriteLine(context.Failure.GetType().FullName);
+                        return Task.CompletedTask;
+                    },
+                    OnAuthenticationFailed = context =>
+                    {
+                        Console.WriteLine($"OnAuthenticationFailed: {context.Exception.Message}");
+                        context.HandleResponse();
                         return Task.CompletedTask;
                     }
                 };
@@ -125,8 +148,11 @@ namespace LinkedOut.Blazor
             app.UseHttpsRedirection();
             app.UseStaticFiles();
 
-            app.UseAuthentication();
+            
+
             app.UseRouting();
+            app.UseAuthentication();
+            app.UseAuthorization();
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapBlazorHub();

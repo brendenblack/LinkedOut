@@ -12,25 +12,26 @@ using System.Threading.Tasks;
 
 namespace LinkedOut.Infrastructure.Persistence
 {
-    public class MyDbContext : ApplicationDbContext
-    {
-        public MyDbContext(DbContextOptions<MyDbContext> options) : base(options, null, null) { }
-    }
-
-    public abstract class ApplicationDbContext : DbContext, IApplicationDbContext
+    public class PostgreSqlApplicationDbContext : DbContext, IApplicationDbContext
     {
         private readonly ICurrentUserService _currentUserService;
         private readonly IDateTime _dateTime;
 
-        public ApplicationDbContext(
-            DbContextOptions options,
+        public PostgreSqlApplicationDbContext(
+            DbContextOptions<PostgreSqlApplicationDbContext> options,
             ICurrentUserService currentUserService,
             IDateTime dateTime) : base(options)
         {
             _currentUserService = currentUserService;
             _dateTime = dateTime;
         }
+        
+        protected override void OnModelCreating(ModelBuilder builder)
+        {
+            builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
 
+            base.OnModelCreating(builder);
+        }
         public DbSet<JobApplication> JobApplications { get; set; }
 
         public DbSet<JobSearch> JobSearches { get; set; }
@@ -56,13 +57,6 @@ namespace LinkedOut.Infrastructure.Persistence
             var result = await base.SaveChangesAsync(cancellationToken);
 
             return result;
-        }
-
-        protected override void OnModelCreating(ModelBuilder builder)
-        {
-            builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
-
-            base.OnModelCreating(builder);
         }
     }
 }

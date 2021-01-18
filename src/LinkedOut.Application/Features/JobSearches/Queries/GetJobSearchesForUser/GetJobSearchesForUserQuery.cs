@@ -33,11 +33,15 @@ namespace LinkedOut.Application.Features.JobSearches.Queries.GetJobSearchesForUs
 
         public async Task<JobSearchListVm> Handle(GetJobSearchesForUserQuery request, CancellationToken cancellationToken)
         {
+            _logger.LogDebug("Fetching job searches for user {UserId}", request.UserId);
+
             var searches = await _context
                 .JobSearches
                 .Where(s => s.OwnerId == request.UserId)
                 .ProjectTo<JobSearchSummaryDto>(_mapper.ConfigurationProvider)
                 .ToListAsync();
+
+            _logger.LogDebug("Found {JobSearchCount} searches for user {UserID}", searches.Count, request.UserId);
 
             return new JobSearchListVm
             {

@@ -1,7 +1,7 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
-namespace LinkedOut.Infrastructure.Persistence.Migrations
+namespace LinkedOut.Infrastructure.Persistence.Migrations.SQLServer
 {
     public partial class InitialCreate : Migration
     {

@@ -23,8 +23,16 @@ namespace LinkedOut.Blazor.Pages
 
         public async Task<IActionResult> OnGet()
         {
+            _logger.LogDebug("OnGet on host {Scheme}://{Host}", HttpContext.Request.Host, HttpContext.Request.Scheme);
+            foreach (var header in HttpContext.Request.Headers)
+            {
+                _logger.LogDebug("Header {Header} = {HeaderValue}", header.Key, header.Value);
+            }
+
             if (User.Identity.IsAuthenticated)
             {
+                _logger.LogInformation("Get request from authenticated user");
+
                 var sid = User.Claims
                     //.Where(c => c.Type.Equals("sid"))
                     .Where(c => c.Type.Equals(ClaimTypes.NameIdentifier))
@@ -56,15 +64,27 @@ namespace LinkedOut.Blazor.Pages
             return Page();
         }
 
-        public IActionResult OnGetLogin()
+        public IActionResult OnGetLogin(string? redirectUri)
         {
+
+            if (string.IsNullOrWhiteSpace(redirectUri) || redirectUri.Contains("login", StringComparison.OrdinalIgnoreCase))
+            {
+                redirectUri = "/";
+                // Url.Content("~/")
+            }
+
             _logger.LogDebug("Getting login");
             var authProps = new AuthenticationProperties
             {
                 IsPersistent = true,
-                ExpiresUtc = DateTimeOffset.UtcNow.AddHours(15), // TODO: provide a sensible value, or from config
-                RedirectUri = Url.Content("~/")
+                ExpiresUtc = DateTimeOffset.UtcNow.AddHours(15),
+                RedirectUri = Url.Content(redirectUri)
             };
+
+            Microsoft.IdentityModel.Protocols.OpenIdConnect.OpenIdConnectMessage x;
+
+            _logger.LogDebug("Preparing challenge with redirect URI {RedirectUri}", authProps.RedirectUri);
+
             return Challenge(authProps, "oidc");
         }
 

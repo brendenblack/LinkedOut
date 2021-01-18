@@ -1,3 +1,5 @@
+using LinkedOut.Application.Common.Interfaces;
+using LinkedOut.Blazor.Services;
 using LinkedOut.Infrastructure.Persistence;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
@@ -30,34 +32,51 @@ namespace LinkedOut.Blazor
                     .CreateLogger();
 
                 var logger = services.GetRequiredService<ILogger<Program>>();
-
+                var env = services.GetService<IHostEnvironment>();
+                logger.LogInformation("Starting LinkedOut in {Environment} mode", env.EnvironmentName);
                 try
                 {
-                    var context = services.GetRequiredService<ApplicationDbContext>();
-
-                    if (!context.Database.IsInMemory())
+                   
+                    // Attempt to migrate the database by first trying to get the SQL Server context. If it isn't found,
+                    // we use GetRequiredService to fetch the PostgreSQL context, throwing an exception if it isn't available
+                    SqlServerApplicationDbContext sqlServerContext = services.GetService<SqlServerApplicationDbContext>();
+                    IApplicationDbContext context; 
+                    if (sqlServerContext != null)
                     {
-                        var scopeDictionary = new Dictionary<string, object>
-                        {
-                            ["OperationType"] = "dbseed"
-                        };
-
-                        using (logger.BeginScope(scopeDictionary))
-                        {
-                            logger.LogInformation("Attempting to migrate the database...");
-                            context.Database.Migrate();
-                            logger.LogInformation("Migration complete");
-                        }
+                        context = sqlServerContext;
+                        ApplyMigration(logger, sqlServerContext);
+                    }
+                    else
+                    {
+                        var postgresqlContext = services.GetRequiredService<PostgreSqlApplicationDbContext>();
+                        ApplyMigration(logger, postgresqlContext);
+                        context = postgresqlContext;
                     }
 
-                    var env = services.GetService<IHostEnvironment>();
-                    if (env.IsDevelopment())
-                    {
-                        logger.LogInformation("Starting up in Development environment");
-                        var testUserId = services.GetRequiredService<IConfiguration>().GetValue("TestUserId", Guid.NewGuid().ToString());
-                        await ApplicationDbContextSeed.SeedTestData(context, testUserId);
-                    }
                     
+                    if (env.IsDevelopment() || env.IsStaging())
+                    {
+                        // we only want to seed the database in staging or lower environments
+                        logger.LogInformation("Performing database seed for {EnvironmentName}", env.EnvironmentName);
+                        var testUserId = config.GetValue<string>("TestUserId", "");
+                        if (string.IsNullOrWhiteSpace(testUserId))
+                        {
+                            testUserId = Guid.NewGuid().ToString();
+                            logger.LogWarning("No test user id was supplied through a TestUserId configuration value. Using GUID {GUID} instead.", testUserId);
+                        }
+
+                        // this is a hack to ensure that our ICurrentUserService returns our seed value, instead of
+                        // trying to call GetAuthenticationStateAsync before an AuthenticationState has been set
+
+                        //OidcCurrentUserService oidcCurrentUserService = (OidcCurrentUserService)services.GetRequiredService<ICurrentUserService>();
+                        //oidcCurrentUserService.UserIdOverride = testUserId;
+                        await ApplicationDbContextSeed.SeedTestData(context, testUserId);
+                        //oidcCurrentUserService.UserIdOverride = null;
+                    }
+                    else
+                    {
+                        logger.LogInformation("Skipping database seed for {EnvironmentName}", env.EnvironmentName);
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -81,6 +100,29 @@ namespace LinkedOut.Blazor
             
         }
 
+        public static void ApplyMigration(ILogger<Program> logger, DbContext context)
+        {
+            var scopeDictionary = new Dictionary<string, object>
+            {
+                ["Method"] = "ApplyMigration",
+                ["DatabaseType"] = context.Database.GetType().FullName
+            };
+
+            using (logger.BeginScope(scopeDictionary))
+            {
+                if (!context.Database.IsInMemory())
+                {
+                    logger.LogInformation("Attempting to migrate the database...");
+                    context.Database.Migrate();
+                    logger.LogInformation("Migration complete");   
+                }
+                else
+                {
+                    logger.LogInformation("Database is in memory, no migrations needed");
+                }
+            }
+        }
+
         public static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
                 .UseSerilog()
@@ -88,5 +130,21 @@ namespace LinkedOut.Blazor
                 {
                     webBuilder.UseStartup<Startup>();
                 });
+    }
+
+    public class SeedCurrentUserService : ICurrentUserService
+    {
+        public SeedCurrentUserService(string userId)
+        {
+            UserId = userId;
+        }
+
+        public string UserId { get; }
+
+        public bool IsAuthenticated => throw new NotImplementedException();
+
+        public string FirstName => throw new NotImplementedException();
+
+        public string Email => throw new NotImplementedException();
     }
 }

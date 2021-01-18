@@ -1,10 +1,8 @@
-# https://github.com/moby/moby/issues/34893
-
+# This Dockerfile is meant to be used by Heroku
+# If you're building locally, use src/LinkedOut.Blazor/Dockerfile instead, providing 
+# the root directory as the context
 FROM mcr.microsoft.com/dotnet/aspnet:5.0-buster-slim AS base
 WORKDIR /app
-# Heroku doesn't want us to expose ports; they manage that themselves
-# EXPOSE 80
-# EXPOSE 443
 
 FROM mcr.microsoft.com/dotnet/sdk:5.0-buster-slim AS build
 WORKDIR /src
@@ -23,4 +21,6 @@ RUN dotnet publish "LinkedOut.Blazor.csproj" -c Release -o /app/publish
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "LinkedOut.Blazor.dll"]
+
+
+CMD ASPNETCORE_URLS=https://*:$PORT dotnet LinkedOut.Blazor.dll

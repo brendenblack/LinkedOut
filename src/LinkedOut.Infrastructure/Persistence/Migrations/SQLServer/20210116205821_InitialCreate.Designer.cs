@@ -7,10 +7,10 @@ using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
-namespace LinkedOut.Infrastructure.Persistence.Migrations
+namespace LinkedOut.Infrastructure.Persistence.Migrations.SQLServer
 {
-    [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20210113141133_InitialCreate")]
+    [DbContext(typeof(SqlServerApplicationDbContext))]
+    [Migration("20210116205821_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
