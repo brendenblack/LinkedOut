@@ -74,6 +74,7 @@ namespace LinkedOut.Blazor
             })
             .AddOpenIdConnect("oidc", options =>
             {
+                options.SignInScheme = "Cookies";
                 options.Authority = Configuration.GetSection("Auth").GetValue<string>("Authority");
                 options.ClientId = Configuration.GetSection("Auth").GetValue<string>("ClientId");
                 options.ClientSecret = Configuration.GetSection("Auth").GetValue<string>("ClientSecret");
