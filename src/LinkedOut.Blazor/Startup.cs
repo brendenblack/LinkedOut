@@ -111,6 +111,12 @@ namespace LinkedOut.Blazor
                         context.Response.Redirect("/");
                         Debug.WriteLine(context.Failure.GetType().FullName);
                         return Task.CompletedTask;
+                    },
+                    OnAuthenticationFailed = context =>
+                    {
+                        Console.WriteLine($"OnAuthenticationFailed: {context.Exception.Message}");
+                        context.HandleResponse();
+                        return Task.CompletedTask;
                     }
                 };
 

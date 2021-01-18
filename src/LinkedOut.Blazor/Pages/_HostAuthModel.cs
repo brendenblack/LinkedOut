@@ -23,7 +23,11 @@ namespace LinkedOut.Blazor.Pages
 
         public async Task<IActionResult> OnGet()
         {
-            _logger.LogDebug("OnGet on host {Host}", HttpContext.Request.Host);
+            _logger.LogDebug("OnGet on host {Scheme}://{Host}", HttpContext.Request.Host, HttpContext.Request.Scheme);
+            foreach (var header in HttpContext.Request.Headers)
+            {
+                _logger.LogDebug("Header {Header} = {HeaderValue}", header.Key, header.Value);
+            }
 
             if (User.Identity.IsAuthenticated)
             {
@@ -60,22 +64,29 @@ namespace LinkedOut.Blazor.Pages
             return Page();
         }
 
-        //public IActionResult OnGetLogin()
-        //{
-        //    _logger.LogDebug("Getting login");
-        //    var authProps = new AuthenticationProperties
-        //    {
-        //        IsPersistent = true,
-        //        ExpiresUtc = DateTimeOffset.UtcNow.AddHours(15), 
-        //        RedirectUri = "https://staging.brendenblack.ca/user" //Url.Content("~/")
-        //    };
+        public IActionResult OnGetLogin(string? redirectUri)
+        {
 
-        //    Microsoft.IdentityModel.Protocols.OpenIdConnect.OpenIdConnectMessage x;
+            if (string.IsNullOrWhiteSpace(redirectUri) || redirectUri.Contains("login", StringComparison.OrdinalIgnoreCase))
+            {
+                redirectUri = "/";
+                // Url.Content("~/")
+            }
 
-        //    _logger.LogDebug("Preparing challenge with redirect URI {RedirectUri}", authProps.RedirectUri);
+            _logger.LogDebug("Getting login");
+            var authProps = new AuthenticationProperties
+            {
+                IsPersistent = true,
+                ExpiresUtc = DateTimeOffset.UtcNow.AddHours(15),
+                RedirectUri = Url.Content(redirectUri)
+            };
 
-        //    return Challenge(authProps, "oidc");
-        //}
+            Microsoft.IdentityModel.Protocols.OpenIdConnect.OpenIdConnectMessage x;
+
+            _logger.LogDebug("Preparing challenge with redirect URI {RedirectUri}", authProps.RedirectUri);
+
+            return Challenge(authProps, "oidc");
+        }
 
         public async Task OnGetLogout()
         {
