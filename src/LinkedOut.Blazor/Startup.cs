@@ -54,10 +54,10 @@ namespace LinkedOut.Blazor
             //    options.RedirectStatusCode = StatusCodes.Status307TemporaryRedirect;
             //    options.HttpsPort = 5001;
             //});
-            services.AddAuthorizationCore(opt =>
-            {
-                //opt.
-            });
+            //services.AddAuthorizationCore(opt =>
+            //{
+            //    //opt.
+            //});
 
             services.AddAuthentication(options =>
             {
