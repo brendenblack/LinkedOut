@@ -59,11 +59,11 @@ namespace LinkedOut.Blazor
                     if (_cache.HasSubjectId(sid))
                     {
 
-                        _logger.LogDebug("Validating login token...");
+                        _logger.LogTrace("Validating login token...");
 
                         var data = _cache.Get(sid);
 
-                        _logger.LogDebug("Login token expires at {TokenExpiry}", data.Expiration.ToString("o"));
+                        _logger.LogTrace("Login token expires at {TokenExpiry}", data.Expiration.ToString("o"));
 
                         if (_dateTime.Now >= data.Expiration)
                         {

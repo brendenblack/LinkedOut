@@ -61,9 +61,11 @@ namespace LinkedOut.Blazor
 
             services.AddAuthentication(options =>
             {
-                options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-                options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-                options.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
+                options.DefaultScheme = "Cookies";
+                options.DefaultChallengeScheme = "oidc";
+                //options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                //options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                //options.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
             })
             .AddCookie("Cookies", opts =>
             {
@@ -89,6 +91,8 @@ namespace LinkedOut.Blazor
 
                 // sets to false is we're in development environment
                 options.RequireHttpsMetadata = !_hostingEnvironment.IsDevelopment();
+
+
 
                 options.Events = new OpenIdConnectEvents
                 {

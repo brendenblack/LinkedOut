@@ -32,7 +32,8 @@ namespace LinkedOut.Blazor
                     .CreateLogger();
 
                 var logger = services.GetRequiredService<ILogger<Program>>();
-
+                var env = services.GetService<IHostEnvironment>();
+                logger.LogInformation("Starting LinkedOut in {Environment} mode", env.EnvironmentName);
                 try
                 {
                    
@@ -52,7 +53,7 @@ namespace LinkedOut.Blazor
                         context = postgresqlContext;
                     }
 
-                    var env = services.GetService<IHostEnvironment>();
+                    
                     if (env.IsDevelopment() || env.IsStaging())
                     {
                         // we only want to seed the database in staging or lower environments
