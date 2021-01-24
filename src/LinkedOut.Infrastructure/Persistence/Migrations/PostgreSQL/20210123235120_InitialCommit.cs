@@ -4,7 +4,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace LinkedOut.Infrastructure.Persistence.Migrations.PostgreSQL
 {
-    public partial class InitialCreate : Migration
+    public partial class InitialCommit : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -41,6 +41,7 @@ namespace LinkedOut.Infrastructure.Persistence.Migrations.PostgreSQL
                     resume = table.Column<string>(type: "text", nullable: true),
                     cover_letter = table.Column<string>(type: "text", nullable: true),
                     job_description = table.Column<string>(type: "text", nullable: true),
+                    job_description_format = table.Column<int>(type: "integer", nullable: false),
                     source = table.Column<string>(type: "text", nullable: true),
                     created = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     created_by = table.Column<string>(type: "text", nullable: true),

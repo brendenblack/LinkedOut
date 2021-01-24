@@ -17,7 +17,7 @@ namespace LinkedOut.Infrastructure.Persistence
         {
             if (!context.JobSearches.Any())
             {
-                var search = new JobSearch(seedUserId) { Title = "Job Search 2020" };
+                var search = new JobSearch(seedUserId) { Title = "The Big Seek" };
                 context.JobSearches.Add(search);
 
                 var resumeContents = "References:<ol><li><i>available</i></li><li>upon</li><li>request</li></ol>";
@@ -31,7 +31,8 @@ namespace LinkedOut.Infrastructure.Persistence
                     Resume = resumeContents,
                     ResumeFormat = Formats.HTML,
                 };
-                new TransitionManager(application1).Submit();
+                application1.Submit(DateTime.Now);
+                //new TransitionManager(application1).Submit();
                 application1.RecordEmployerContact("Hi, we have received your application and if we can be bothered we'll be in touch.", "Jane Doe", "Application received");
                 context.JobApplications.Add(application1);
 

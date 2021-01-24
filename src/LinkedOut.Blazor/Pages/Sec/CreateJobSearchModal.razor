@@ -1,7 +1,8 @@
-﻿@using LinkedOut.Application.Features.JobSearches.Commands
+﻿@using LinkedOut.Application.JobSearches.Commands
 @using System.ComponentModel.DataAnnotations
 
-@inject IMediator _mediator; 
+
+@inject IMediator _mediator;
 @inject ICurrentUserService _currentUserService;
 
 @{
@@ -12,7 +13,7 @@
                 Loading="@_loading">
             Create
         </Button>
-        <Button OnClick="@HandleCancel" @key="@( "back" )">Cancel</Button>
+        <Button OnClick="@HandleCancel" @key="@( "back" )" Disabled="_loading">Cancel</Button>
     </Template>;
 }
 
@@ -20,7 +21,6 @@
        Visible="@_isVisible"
        OnOk="@HandleOk"
        OnCancel="@HandleCancel"
-
        Footer="@footer">
     <Form Model="@model"
           @ref="form"
@@ -30,7 +30,7 @@
             <Input @bind-Value="@context.Title" />
         </FormItem>
         <FormItem Label="Created on">
-            <DatePicker TValue="DateTime" Picker="@DatePickerType.Date"  @bind-Value="@context.CreatedOn" />
+            <DatePicker TValue="DateTime" Picker="@DatePickerType.Date" @bind-Value="@context.CreatedOn" />
         </FormItem>
     </Form>
 </Modal>
@@ -43,6 +43,9 @@
 
     [Parameter]
     public EventCallback OnClose { get; set; }
+
+    [Parameter]
+    public EventCallback<int> OnCreate { get; set; }
 
     bool _loading = false;
 
@@ -64,7 +67,14 @@
             StateHasChanged();
             if (result.IsSuccess)
             {
+                if (OnCreate.HasDelegate)
+                {
+                    await OnCreate.InvokeAsync(result.Value);
+                }
+
                 await Finally();
+               
+
             }
         }
 
@@ -79,6 +89,7 @@
 
     private async Task Finally()
     {
+        model = new();
         _isVisible = false;
         if (OnClose.HasDelegate)
         {
@@ -89,6 +100,7 @@
     public void Show()
     {
         _isVisible = true;
+        StateHasChanged();
     }
 
     private Form<CreateJobSearchFormModel> form;

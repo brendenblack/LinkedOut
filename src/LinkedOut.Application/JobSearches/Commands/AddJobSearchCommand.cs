@@ -10,7 +10,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace LinkedOut.Application.Features.JobSearches.Commands
+namespace LinkedOut.Application.JobSearches.Commands
 {
     public class AddJobSearchCommand : IRequest<Result<int>>
     {

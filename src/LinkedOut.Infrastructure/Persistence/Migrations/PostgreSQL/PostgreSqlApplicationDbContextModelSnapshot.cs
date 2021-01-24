@@ -43,6 +43,10 @@ namespace LinkedOut.Infrastructure.Persistence.Migrations.PostgreSQL
                         .HasColumnType("text")
                         .HasColumnName("job_description");
 
+                    b.Property<int>("JobDescriptionFormat")
+                        .HasColumnType("integer")
+                        .HasColumnName("job_description_format");
+
                     b.Property<string>("JobTitle")
                         .HasColumnType("text")
                         .HasColumnName("job_title");

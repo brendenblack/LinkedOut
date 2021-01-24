@@ -67,13 +67,13 @@ namespace LinkedOut.Blazor
 
                         if (_dateTime.Now >= data.Expiration)
                         {
-                            _logger.LogDebug("Login token is expired");
+                            _logger.LogTrace("Login token is expired");
                             _cache.Remove(sid);
                             return Task.FromResult(false);
                         }
                         else
                         {
-                            _logger.LogDebug("Login token is still valid");
+                            _logger.LogTrace("Login token is still valid");
                         }
                     }
                     else

@@ -19,9 +19,13 @@ namespace LinkedOut.Domain.ValueObjects
 
         public override string ToString()
         {
-            if (CityName.Equals("remote", StringComparison.InvariantCultureIgnoreCase))
+            if (!string.IsNullOrEmpty(CityName) && string.IsNullOrWhiteSpace(Province))
             {
-                return "Remote";
+                return CityName;
+            }
+            else if (string.IsNullOrWhiteSpace(CityName) && string.IsNullOrWhiteSpace(Province))
+            {
+                return "Parts Uknown";
             }
             else
             {
@@ -34,6 +38,8 @@ namespace LinkedOut.Domain.ValueObjects
         public static Location Victoria => new Location("Victoria", BRITISH_COLUMBIA);
 
         public static Location Remote => new Location("Remote", "");
+
+        public static Location PartsUnknown => new Location("Parts Unknown", "");
 
 
         public static readonly string ALBERTA = "Alberta";

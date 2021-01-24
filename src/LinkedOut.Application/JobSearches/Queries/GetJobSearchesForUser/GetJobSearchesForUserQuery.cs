@@ -11,7 +11,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace LinkedOut.Application.Features.JobSearches.Queries.GetJobSearchesForUser
+namespace LinkedOut.Application.JobSearches.Queries.GetJobSearchesForUser
 {
     public class GetJobSearchesForUserQuery : IRequest<JobSearchListVm>
     {
@@ -38,6 +38,8 @@ namespace LinkedOut.Application.Features.JobSearches.Queries.GetJobSearchesForUs
             var searches = await _context
                 .JobSearches
                 .Where(s => s.OwnerId == request.UserId)
+                .Include(s => s.Applications)
+                .ThenInclude(a => a.Transitions)
                 .ProjectTo<JobSearchSummaryDto>(_mapper.ConfigurationProvider)
                 .ToListAsync();
 

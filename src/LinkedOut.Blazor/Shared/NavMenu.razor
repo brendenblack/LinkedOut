@@ -8,7 +8,7 @@
     {
         <Menu Mode="MenuMode.Horizontal" Theme="MenuTheme.Dark" >
             <SubMenu Title="Job searches">
-                <MenuItem Key="mysearches"><MenuLink href="/sec/jobsearch">My searches</MenuLink></MenuItem>
+                <MenuItem Key="mysearches" RouterLink="/sec/jobsearch" RouterMatch="NavLinkMatch.Prefix"><MenuLink href="/sec/jobsearch">My searches</MenuLink></MenuItem>
                 <MenuItemGroup Title="Recent searches">
                     @*<MenuItem Key="search1">Job Search 2020</MenuItem>*@
                 </MenuItemGroup>

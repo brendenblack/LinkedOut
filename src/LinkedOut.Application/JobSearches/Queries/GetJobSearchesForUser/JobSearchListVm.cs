@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace LinkedOut.Application.Features.JobSearches.Queries.GetJobSearchesForUser
+namespace LinkedOut.Application.JobSearches.Queries.GetJobSearchesForUser
 {
     public class JobSearchListVm
     {

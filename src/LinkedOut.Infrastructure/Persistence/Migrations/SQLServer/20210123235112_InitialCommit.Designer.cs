@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LinkedOut.Infrastructure.Persistence.Migrations.SQLServer
 {
     [DbContext(typeof(SqlServerApplicationDbContext))]
-    [Migration("20210116205821_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20210123235112_InitialCommit")]
+    partial class InitialCommit
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -39,6 +39,9 @@ namespace LinkedOut.Infrastructure.Persistence.Migrations.SQLServer
 
                     b.Property<string>("JobDescription")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("JobDescriptionFormat")
+                        .HasColumnType("int");
 
                     b.Property<string>("JobTitle")
                         .HasColumnType("nvarchar(max)");

@@ -1,0 +1,152 @@
+﻿@using LinkedOut.Application.JobSearches.Commands
+@using System.ComponentModel.DataAnnotations
+
+
+@inject IMediator _mediator;
+@inject ICurrentUserService _currentUserService
+@inject ILogger<EditJobDescriptionModal> _logger
+
+@{
+    RenderFragment footer = @<Template>
+        <Button OnClick="@HandleOk" @key="@( "submit" )"
+                HtmlType="submit"
+                Type="@ButtonType.Primary"
+                Loading="@_loading">
+            Create
+        </Button>
+        <Button OnClick="@HandleCancel" @key="@( "back" )" Disabled="_loading">Cancel</Button>
+    </Template>;
+}
+
+<Modal Title="Create a job description"
+       Visible="@_isVisible"
+       OnOk="@HandleOk"
+       OnCancel="@HandleCancel"
+       Footer="@footer"
+       Width="1000">
+    <Form Model="@Model"
+          Loading="_loading"
+          @ref="form"
+          LabelColSpan="6"
+          WrapperColSpan="18">
+
+        <FormItem Label="Organization">
+            <Input @bind-Value="@context.OrganizationName" Placeholder="Microsoft"/>
+        </FormItem>
+
+        <FormItem Label="Job title">
+            <Input @bind-Value="@context.JobTitle" Placeholder="Senior Zune Quality Analyst" />
+        </FormItem>
+
+        <FormItem Label="Job description">
+            <TextArea @bind-Value="@context.Description" MinRows="8" MaxRows="8" />
+        </FormItem>
+
+        <FormItem Label="Remote?">
+            <Switch @bind-Value="@context.IsRemote" />
+        </FormItem>
+
+        <FormItem Label="Source">
+            <Input @bind-Value="@context.Source" Placeholder="Where did you hear about this opportunity?" />
+        </FormItem>
+    </Form>
+</Modal>
+
+@code {
+    [Parameter]
+    public EventCallback OnClose { get; set; }
+
+    [Parameter]
+    public EventCallback<int> OnCreate { get; set; }
+
+    [Parameter]
+    public EventCallback<int> OnUpdate { get; set; }
+
+    [Parameter]
+    public EditJobDescriptionFormModel Model { get; set; } = new();
+
+    [Parameter]
+    public int JobSearchId { get; set; }
+
+    public void Show()
+    {
+        _isVisible = true;
+        StateHasChanged(); // TODO: is this needed?
+    }
+
+    private Form<EditJobDescriptionFormModel> form;
+
+    public bool _isVisible { get; set; } = false;
+
+    bool _loading = false;
+
+    private async Task HandleOk(MouseEventArgs e)
+    {
+        if (form.Validate())
+        {
+            _loading = true;
+            StateHasChanged();
+
+            try
+            {
+                if (Model.JobApplicationId.HasValue)
+                {
+
+                    var command = new UpdateJobDescriptionCommand
+                    {
+                        JobApplicationId = Model.JobApplicationId.Value,
+                        Description = Model.Description,
+                        JobTitle = Model.JobTitle,
+                        OrganizationName = Model.OrganizationName,
+                        DescriptionFormat = Domain.Formats.PLAINTEXT, // only supports plain text at this point
+                        Source = Model.Source
+                    };
+
+                    _logger.LogDebug("Sending {CommandType}: {@Command}", command.GetType().Name, command);
+                    var updateResult = await _mediator.Send(command);
+
+                }
+                else
+                {
+                    var command = new AddJobDescriptionCommand
+                    {
+                        JobSearchId = JobSearchId,
+                        Description = Model.Description,
+                        JobTitle = Model.JobTitle,
+                        OrganizationName = Model.OrganizationName,
+                        DescriptionFormat = Domain.Formats.PLAINTEXT, // only supports plain text at this point
+                        Source = Model.Source
+                    };
+
+                    _logger.LogDebug("Sending {CommandType}: {@Command}", command.GetType().Name, command);
+                    var addResult = await _mediator.Send(command);
+                }
+            }
+            catch (Exception addOrUpdateException)
+            {
+                _logger.LogError("Exception while adding or updating the job posting: {Message}", addOrUpdateException.Message);
+            }
+            finally
+            {
+                _loading = false;
+                StateHasChanged();
+            }
+        }
+    }
+
+    private async Task HandleCancel(MouseEventArgs e)
+    {
+        Console.WriteLine(e);
+        await Finally();
+    }
+
+    private async Task Finally()
+    {
+        Model = new();
+        _isVisible = false;
+        if (OnClose.HasDelegate)
+        {
+            await OnClose.InvokeAsync();
+        }
+    }
+}

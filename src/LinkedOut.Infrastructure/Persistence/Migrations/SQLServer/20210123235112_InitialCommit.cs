@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace LinkedOut.Infrastructure.Persistence.Migrations.SQLServer
 {
-    public partial class InitialCreate : Migration
+    public partial class InitialCommit : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -40,6 +40,7 @@ namespace LinkedOut.Infrastructure.Persistence.Migrations.SQLServer
                     Resume = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     CoverLetter = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     JobDescription = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    JobDescriptionFormat = table.Column<int>(type: "int", nullable: false),
                     Source = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Created = table.Column<DateTime>(type: "datetime2", nullable: false),
                     CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),

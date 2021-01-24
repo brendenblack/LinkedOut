@@ -10,8 +10,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace LinkedOut.Infrastructure.Persistence.Migrations.PostgreSQL
 {
     [DbContext(typeof(PostgreSqlApplicationDbContext))]
-    [Migration("20210116205831_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20210123235120_InitialCommit")]
+    partial class InitialCommit
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -44,6 +44,10 @@ namespace LinkedOut.Infrastructure.Persistence.Migrations.PostgreSQL
                     b.Property<string>("JobDescription")
                         .HasColumnType("text")
                         .HasColumnName("job_description");
+
+                    b.Property<int>("JobDescriptionFormat")
+                        .HasColumnType("integer")
+                        .HasColumnName("job_description_format");
 
                     b.Property<string>("JobTitle")
                         .HasColumnType("text")

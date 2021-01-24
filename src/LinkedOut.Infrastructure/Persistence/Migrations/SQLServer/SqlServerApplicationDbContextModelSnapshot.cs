@@ -38,6 +38,9 @@ namespace LinkedOut.Infrastructure.Persistence.Migrations.SQLServer
                     b.Property<string>("JobDescription")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("JobDescriptionFormat")
+                        .HasColumnType("int");
+
                     b.Property<string>("JobTitle")
                         .HasColumnType("nvarchar(max)");
 

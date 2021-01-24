@@ -1,11 +1,11 @@
 ﻿@page "/sec"
 @page "/sec/jobsearch"
 
-@using LinkedOut.Application.Features.JobSearches.Queries.GetJobSearchesForUser
+@using LinkedOut.Application.JobSearches.Queries.GetJobSearchesForUser
 
 @inject IMediator _mediator
 @inject ICurrentUserService _currentUserService
-
+@inject MessageService _message
 
 <Content Class="container">
     <div class="root">
@@ -30,12 +30,12 @@
                         </Column>
                         <Column @bind-Field="@context.ApplicationsCount"></Column>
                         @*<ActionColumn Title="Action">
-                    <Space Size="middle">
-                        <SpaceItem>
-                            <a>Delete</a>
-                        </SpaceItem>
-                    </Space>
-                </ActionColumn>*@
+                                <Space Size="middle">
+                                    <SpaceItem>
+                                        <a>Delete</a>
+                                    </SpaceItem>
+                                </Space>
+                            </ActionColumn>*@
                     </Table>
                 }
             </SpaceItem>
@@ -43,13 +43,13 @@
     </div>
 </Content>
 
-<CreateJobSearchModal 
-    @ref="createJobSearchModal"
- />
+<CreateJobSearchModal @ref="createJobSearchModal"
+                      OnCreate="handleJobSearchCreate" />
 
 @code {
     public void handleCreateJobSearchClick()
     {
+        Console.WriteLine("Handling a click event!");
         createJobSearchModal.Show();
     }
 
@@ -57,11 +57,21 @@
 
     private List<JobSearchSummaryDto> _jobSearches = new List<JobSearchSummaryDto>();
 
-    protected override async Task OnInitializedAsync()
+    private async Task handleJobSearchCreate(int jobSearchId)
+    {
+        _message.Success($"Job search successfully created");
+        await RefreshJobSearches();
+    }
+
+    private async Task RefreshJobSearches()
     {
         var vm = await _mediator.Send(new GetJobSearchesForUserQuery { UserId = _currentUserService.UserId });
         _jobSearches = vm.JobSearches;
+    }
 
+    protected override async Task OnInitializedAsync()
+    {
+        await RefreshJobSearches();
 
         //    _jobSearches = new List<JobSearchSummaryDto>
         //{

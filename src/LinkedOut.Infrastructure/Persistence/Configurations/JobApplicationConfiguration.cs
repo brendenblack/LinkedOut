@@ -9,10 +9,12 @@ using System.Threading.Tasks;
 
 namespace LinkedOut.Infrastructure.Persistence.Configurations
 {
-    public class ApplicationConfiguration : IEntityTypeConfiguration<JobApplication>
+    public class JobApplicationConfiguration : IEntityTypeConfiguration<JobApplication>
     {
         public void Configure(EntityTypeBuilder<JobApplication> builder)
         {
+            builder.Ignore(a => a.CanSubmit);
+
             builder.HasMany(a => a.Notes)
                 .WithOne(e => e.Application)
                 .HasForeignKey(e => e.ApplicationId);

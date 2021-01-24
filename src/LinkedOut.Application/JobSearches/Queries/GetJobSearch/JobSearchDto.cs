@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace LinkedOut.Application.Features.JobSearches.Queries.GetJobSearch
+namespace LinkedOut.Application.JobSearches.Queries.GetJobSearch
 {
     public class JobSearchDto : IMapFrom<JobSearch>
     {
@@ -21,10 +21,12 @@ namespace LinkedOut.Application.Features.JobSearches.Queries.GetJobSearch
 
         public bool IsActive { get; set; }
 
+        public List<JobOpportunityDto> Applications { get; set; }
+
         public void MapFrom(Profile profile)
         {
             profile.CreateMap<JobSearch, JobSearchDto>()
-                .ForMember(s => s.IsActive, opt => opt.Ignore());
+                .ForMember(s => s.IsActive, opt => opt.MapFrom(d => !d.Applications.Any(a => a.Resolution == Domain.ApplicationResolutions.OFFER_ACCEPTED)));
         }
     }
 }

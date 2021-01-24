@@ -28,5 +28,9 @@ namespace LinkedOut.Domain.Entities
         public string Author { get; set; }
 
         public string Contents { get; set; }
+
+        public bool IsSelfAuthored => Author == SelfAuthoredAuthor;
+
+        public static readonly string SelfAuthoredAuthor = "self";
     }
 }

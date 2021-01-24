@@ -23,16 +23,14 @@ namespace LinkedOut.Blazor.Pages
 
         public async Task<IActionResult> OnGet()
         {
-            _logger.LogDebug("OnGet on host {Scheme}://{Host}", HttpContext.Request.Host, HttpContext.Request.Scheme);
+            _logger.LogTrace("OnGet on host {Scheme}://{Host}", HttpContext.Request.Host, HttpContext.Request.Scheme);
             foreach (var header in HttpContext.Request.Headers)
             {
-                _logger.LogDebug("Header {Header} = {HeaderValue}", header.Key, header.Value);
+                _logger.LogTrace("Header {Header} = {HeaderValue}", header.Key, header.Value);
             }
 
             if (User.Identity.IsAuthenticated)
             {
-                _logger.LogInformation("Get request from authenticated user");
-
                 var sid = User.Claims
                     //.Where(c => c.Type.Equals("sid"))
                     .Where(c => c.Type.Equals(ClaimTypes.NameIdentifier))

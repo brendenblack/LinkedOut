@@ -30,7 +30,18 @@ namespace LinkedOut.Domain.Entities
 
         public virtual JobSearch ParentSearch { get; private set; }
 
-        public Location Location { get; set; }
+        private Location _location;
+        public Location Location
+        {
+            get
+            {
+                return _location ??  Location.PartsUnknown;
+            }
+            set
+            {
+                _location = value;
+            }
+        }
 
         public string OrganizationName { get; set; }
 
@@ -47,7 +58,7 @@ namespace LinkedOut.Domain.Entities
         /// </summary>
         public string JobDescription { get; set; }
 
-        public Formats JobDescriptionFormat = Formats.PLAINTEXT;
+        public Formats JobDescriptionFormat { get; set; } = Formats.PLAINTEXT;
 
         /// <summary>
         /// Where this job opportunity was discovered.
@@ -83,6 +94,35 @@ namespace LinkedOut.Domain.Entities
         public bool IsClosed => CurrentStatus == ApplicationStatuses.CLOSED;
 
         public virtual IReadOnlyCollection<StatusTransition> Transitions { get; } = new List<StatusTransition>();
+
+        public bool CanSubmit => CurrentStatus == ApplicationStatuses.INPROGRESS;
+
+        public Result<StatusTransition> Submit(DateTime effectiveAsOf, string resume, Formats resumeFormat)
+        {
+            var transitionResult = Submit(effectiveAsOf);
+            if (transitionResult.IsFailed)
+            {
+                return transitionResult;
+            }
+
+            Resume = resume;
+            ResumeFormat = resumeFormat;
+
+            return Result.Ok(transitionResult.Value);
+        }
+
+        public Result<StatusTransition> Submit(DateTime effectiveAsOf)
+        {
+            if (CurrentStatus != ApplicationStatuses.INPROGRESS)
+            {
+                return Result.Fail($"An application can only be submitted when it is {ApplicationStatuses.INPROGRESS}, but it is currently {CurrentStatus}"); // TODO
+            }
+
+            var creation = new StatusTransition(this, ApplicationStatuses.INPROGRESS, ApplicationStatuses.SUBMITTED, effectiveAsOf, ApplicationResolutions.UNRESOLVED);
+            ((List<StatusTransition>)Transitions).Add(creation);
+
+            return Result.Ok(creation);
+        }        
 
         /// <summary>
         /// Transition this application from one status to another.
@@ -185,7 +225,7 @@ namespace LinkedOut.Domain.Entities
         {
             var note = new Note(this)
             {
-                Author = "self",
+                Author = Note.SelfAuthoredAuthor,
                 Timestamp = DateTime.Now,
                 Contents = contents
             };
