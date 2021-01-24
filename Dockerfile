@@ -23,4 +23,4 @@ WORKDIR /app
 COPY --from=publish /app/publish .
 
 
-CMD ASPNETCORE_URLS=https://*:$PORT dotnet LinkedOut.Blazor.dll
+CMD dotnet LinkedOut.Blazor.dll
