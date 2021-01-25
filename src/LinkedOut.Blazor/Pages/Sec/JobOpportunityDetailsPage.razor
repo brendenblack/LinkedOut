@@ -1,0 +1,122 @@
+﻿@page "/sec/jobsearch/{jobSearchId:int}/opportunity/{jobOpportunityId:int}" 
+
+@using LinkedOut.Application.JobSearches.Queries.GetJobOpportunity
+
+@inject IMediator _mediator
+  
+<Layout Style="height: 100%" Class="layout">
+    @if (_loading)
+    {
+        <Spin />
+    }
+    else if (_opportunity == null)
+    {
+        <Empty>
+            <DescriptionTemplate>
+                This opportunity doesn't exist. It probably went to someone's nephew.
+            </DescriptionTemplate>
+        </Empty>
+    }
+    else
+    {
+        <PageHeader Class="site-page-header" Title="@_pageTitle">
+            <PageHeaderBreadcrumb>
+                <Breadcrumb Style="margin: 16px 0;">
+                    <BreadcrumbItem><a href="/sec/jobsearch">Job searches</a></BreadcrumbItem>
+                    <BreadcrumbItem><a href="/sec/jobsearch/@JobSearchId">@_opportunity.ParentSearchTitle</a></BreadcrumbItem>
+                    <BreadcrumbItem>@_opportunity.JobTitle at @_opportunity.OrganizationName</BreadcrumbItem>
+                </Breadcrumb>
+            </PageHeaderBreadcrumb>
+            <PageHeaderExtra>
+                @if (!_opportunity.DidApply)
+                {
+                    @*<Button Type="@ButtonType.Primary" Icon="file-done">Apply</Button>*@
+                    <a class="ant-btn ant-btn-primary" href="/sec/jobsearch/@JobSearchId/opportunity/@JobOpportunityId/apply">Apply</a>
+                }
+            </PageHeaderExtra>
+        </PageHeader>
+        <Content>
+            <Card Title="Job description">
+                <RichTextContainer Contents="@_opportunity.JobDescription" Format="@_opportunity.JobDescriptionFormat" />
+            </Card>
+            <section>
+                <Tabs DefaultActiveKey="comments">
+                    <TabPane Key="comments">
+                        <Tab>Employer contents</Tab>
+                        <ChildContent>
+                            @foreach (var note in _opportunity.Notes)
+                            {
+                                <div class="ant-comment">
+                                    <div class="ant-comment-inner">
+                                        <div class="ant-comment-avatar">
+                                            @*<span class="ant-avatar ant-avatar-circle ant-avatar-image">
+                                        <img src="https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png" alt="Han Solo">
+                                    </span>*@
+                                        </div>
+                                        <div class="ant-comment-content">
+                                            <div class="ant-comment-content-author">
+                                                <span class="ant-comment-content-author-name">
+                                                    <a>@note.Author</a>
+                                                </span>
+                                                <span class="ant-comment-content-author-time">
+                                                    <span>@note.Timestamp.ToShortDateString() @note.Timestamp.ToLongTimeString()</span>
+                                                </span>
+                                            </div>
+                                            <div class="ant-comment-content-detail">
+                                                <p>@note.Contents</p>
+                                            </div>
+                                            <ul class="ant-comment-actions">
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                @*<Comment Author="@note.Author" Datetime="@note.Timestamp.ToLongDateString()" Content="@note.Contents" />*@
+                            }
+                        </ChildContent>
+                    </TabPane>
+                    <TabPane Key="notes">
+                        <Tab>Notes</Tab>
+                        <ChildContent>
+                            Notes go here
+                        </ChildContent>
+                    </TabPane>
+                    <TabPane Key="activity">
+                        <Tab>Activity</Tab>
+                        <ChildContent>
+                            <ul class="anti-list-items">
+                                @foreach (var transition in _opportunity.Transitions)
+                                {
+                                    <li class="ant-list-item">From @transition.TransitionFrom to @transition.TransitionTo at @transition.Timestamp</li>
+                                }
+                            </ul>
+                        </ChildContent>
+                    </TabPane>
+                </Tabs>
+            </section>
+        </Content>
+    }
+</Layout>
+
+@code {
+    [Parameter]
+    public int JobSearchId { get; set; }
+
+    [Parameter]
+    public int JobOpportunityId { get; set; }
+
+    bool _loading = false;
+    JobOpportunityDto _opportunity;
+    string _pageTitle = "";
+
+
+    protected override async Task OnParametersSetAsync()
+    {
+        _opportunity = await _mediator.Send(new GetJobOpportunityQuery { JobOpportunityId = JobOpportunityId });
+        if (_opportunity != null)
+        {
+            _pageTitle = $"{_opportunity.JobTitle} at {_opportunity.OrganizationName}";
+        }
+
+        await base.OnParametersSetAsync();
+    }
+}

@@ -15,9 +15,21 @@
             </SpaceItem>
 
             <SpaceItem>
-                @if (_jobSearches.Count == 0)
+                @if (_loading)
                 {
-                    <Alert Message="You have not created any job searches" Type="@AlertType.Info" />
+                    <Spin />
+                }
+                else if (_jobSearches.Count == 0)
+                {
+                    <Empty>
+                        <DescriptionTemplate>
+                            You have not began any job searches
+                        </DescriptionTemplate>
+                        <ChildContent>
+                            <Button Type="@ButtonType.Primary" OnClick="@handleCreateJobSearchClick">Start one now</Button>
+                        </ChildContent>
+                    </Empty>
+                    
                 }
                 else
                 {
@@ -25,10 +37,10 @@
                         <Column @bind-Field="@context.Title">
                             <a href=@(Routes.MakeJobSearchUrl(context.Id))>@context.Title</a>
                         </Column>
-                        <Column @bind-Field="@context.Created">
+                        <Column @bind-Field="@context.Created" Title="Began">
                             @context.Created.ToShortDateString()
                         </Column>
-                        <Column @bind-Field="@context.ApplicationsCount"></Column>
+                        <Column @bind-Field="@context.ApplicationsCount" Title="Opportunities"></Column>
                         @*<ActionColumn Title="Action">
                                 <Space Size="middle">
                                     <SpaceItem>
@@ -47,6 +59,8 @@
                       OnCreate="handleJobSearchCreate" />
 
 @code {
+    bool _loading = false;
+
     public void handleCreateJobSearchClick()
     {
         Console.WriteLine("Handling a click event!");
@@ -59,30 +73,33 @@
 
     private async Task handleJobSearchCreate(int jobSearchId)
     {
+        // awaiting this pauses execution until it returns, which we don't want
+        // instead, we just fire & forget
         _message.Success($"Job search successfully created");
         await RefreshJobSearches();
     }
 
+    /// <summary>
+    /// Fetches the job searches associated with the current user.
+    /// </summary>
+    /// <remarks>This operaiton refreshes the state upon completion.</remarks>
+    /// <returns></returns>
     private async Task RefreshJobSearches()
     {
+        _loading = true;
+        StateHasChanged();
+
+
         var vm = await _mediator.Send(new GetJobSearchesForUserQuery { UserId = _currentUserService.UserId });
         _jobSearches = vm.JobSearches;
+
+        _loading = false;
+        StateHasChanged();
     }
 
     protected override async Task OnInitializedAsync()
     {
         await RefreshJobSearches();
-
-        //    _jobSearches = new List<JobSearchSummaryDto>
-        //{
-        //        new JobSearchSummaryDto
-        //        {
-        //            Title = "My first job hunt",
-        //            ApplicationsCount = 0,
-        //            CreatedOn = DateTime.Now,
-        //            Id = 0
-        //        }
-        //    };
 
         await base.OnInitializedAsync();
     }

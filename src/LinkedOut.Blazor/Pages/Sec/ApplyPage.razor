@@ -1,0 +1,104 @@
+﻿@page "/sec/jobsearch/{jobSearchId:int}/opportunity/{opportunityId:int}/apply"
+
+@using LinkedOut.Application.JobSearches.Queries.GetJobOpportunity
+@using LinkedOut.Application.JobSearches.Commands
+
+@inject IMediator _mediator
+@inject IJSRuntime _js
+
+<Layout>
+    @if (_opportunity != null)
+    {
+        <PageHeader Title="@_pageTitle">
+        </PageHeader>
+
+        <Content>
+            <Spin Spinning="_loading">
+                <div id="resume">
+                    <p>Hire me, <strong>please</strong>.</p>
+                </div>
+                <Button OnClick="handleApplyClick">Apply</Button>
+            </Spin>
+        </Content>
+        
+        
+    }
+</Layout>
+
+@code {
+    [Parameter]
+    public int JobSearchId { get; set; }
+
+    [Parameter]
+    public int OpportunityId { get; set; }
+
+    JobOpportunityDto _opportunity;
+
+    bool _loading = false;
+
+    string _pageTitle = "";
+
+    bool _isSubmitted = false;
+
+    string _contents;
+
+    IJSObjectReference editor;
+
+    private async Task handleApplyClick()
+    {
+        _loading = true;
+        StateHasChanged();
+
+        var contents = await _js.InvokeAsync<string>("getEditorContentAsHtml", editor);
+        var command = new SubmitApplicationCommand
+        {
+            JobApplicationId = OpportunityId,
+            ResumeFormat = Formats.HTML,
+            ResumeContents = contents
+        };
+
+        var result = await _mediator.Send(command);
+
+        await Update();
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await Update();
+        await base.OnParametersSetAsync();
+    }
+
+    private async Task Update()
+    {
+        if (!_loading)
+        {
+            _loading = true;
+            StateHasChanged();
+        }
+
+        var query = new GetJobOpportunityQuery { JobOpportunityId = OpportunityId };
+
+        _opportunity = await _mediator.Send(query);
+
+        if (_opportunity != null)
+        {
+            _pageTitle = $"Application for {_opportunity.JobTitle} at {_opportunity.OrganizationName}";
+            _isSubmitted = _opportunity.DidApply;
+        }
+
+        _loading = false;
+        StateHasChanged();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            editor = await _js.InvokeAsync< IJSObjectReference>("initializeRichTextEditor", "#resume");
+        }
+
+        await base.OnAfterRenderAsync(firstRender);
+    }
+
+
+}

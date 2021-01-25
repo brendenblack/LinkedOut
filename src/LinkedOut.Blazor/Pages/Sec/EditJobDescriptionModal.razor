@@ -1,6 +1,4 @@
 ﻿@using LinkedOut.Application.JobSearches.Commands
-@using System.ComponentModel.DataAnnotations
-
 
 @inject IMediator _mediator;
 @inject ICurrentUserService _currentUserService
@@ -98,7 +96,7 @@
                         Description = Model.Description,
                         JobTitle = Model.JobTitle,
                         OrganizationName = Model.OrganizationName,
-                        DescriptionFormat = Domain.Formats.PLAINTEXT, // only supports plain text at this point
+                        DescriptionFormat = Formats.PLAINTEXT, // only supports plain text at this point
                         Source = Model.Source
                     };
 
@@ -114,7 +112,7 @@
                         Description = Model.Description,
                         JobTitle = Model.JobTitle,
                         OrganizationName = Model.OrganizationName,
-                        DescriptionFormat = Domain.Formats.PLAINTEXT, // only supports plain text at this point
+                        DescriptionFormat = Formats.PLAINTEXT, // only supports plain text at this point
                         Source = Model.Source
                     };
 

@@ -30,7 +30,7 @@ namespace LinkedOut.Application.IntegrationTests.JobSearches.Queries
                 JobDescription = "Very important role.",
                 Location = Location.Toronto,
                 Resume = "I am qualified",
-                ResumeFormat = Domain.Formats.PLAINTEXT,
+                ResumeFormat = Formats.PLAINTEXT,
             };
             app.Submit(DateTime.Now);
             app.RecordEmployerContact("Seriously?", received: DateTime.Now.AddHours(3));

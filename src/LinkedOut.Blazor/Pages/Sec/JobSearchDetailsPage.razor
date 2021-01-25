@@ -63,7 +63,9 @@
         }
         else if (jobSearch == null)
         {
-
+            <Empty>
+                It must have only been a nightmare, this search wasn't started! <a href="/sec/jobsearch">Go back</a>.
+            </Empty>
         }
         else
         {
@@ -133,7 +135,7 @@
                             {
                     <Table TItem="JobOpportunityDto" DataSource="@jobSearch.Applications">
                         <Column @bind-Field="@context.JobTitle" Title="Title" Sortable>
-                            <a href="/sec/jobsearch/@JobSearchId/@context.Id">@context.JobTitle</a>
+                            <a href="/sec/jobsearch/@JobSearchId/opportunity/@context.Id">@context.JobTitle</a>
                         </Column>
                         <Column @bind-Field="@context.OrganizationName" Title="Organization" Sortable></Column>
                         <Column @bind-Field="@context.Location" Sortable>
@@ -184,19 +186,19 @@
 
 
 @code {
-    [Parameter]
-    public int JobSearchId { get; set; }
+        [Parameter]
+        public int JobSearchId { get; set; }
 
-    JobSearchDto jobSearch;
-    int _jobsTracked = 0;
-    int _jobsAppliedTo = 0;
-    int _openApplications = 0;
-    int _employerContacts = 0;
-    int _rejections = 0;
-    int _daysInProgress = 0;
-    List<StatisticEntry> _statistics = new();
+        JobSearchDto jobSearch;
+        int _jobsTracked = 0;
+        int _jobsAppliedTo = 0;
+        int _openApplications = 0;
+        int _employerContacts = 0;
+        int _rejections = 0;
+        int _daysInProgress = 0;
+        List<StatisticEntry> _statistics = new();
 
-    bool _isLoading = false;
+        bool _isLoading = false;
 
     private EditJobDescriptionModal editJobDescriptionModal;
     private void handleAddJobPostingClick()
@@ -233,32 +235,36 @@
 
         _statistics.Clear();
 
-        _daysInProgress = (int)(DateTime.Now - jobSearch.Created).TotalDays;
-        _statistics.Add(new StatisticEntry { Title = "Days In Progress", Value = _daysInProgress });
+        if (jobSearch != null)
+        {
 
-        _jobsTracked = jobSearch.Applications.Count;
-        _statistics.Add(new StatisticEntry { Title = "Opportunities", Value = _jobsTracked });
+            _daysInProgress = (int)(DateTime.Now - jobSearch.Created).TotalDays;
+            _statistics.Add(new StatisticEntry { Title = "Days In Progress", Value = _daysInProgress });
 
-        _jobsAppliedTo = jobSearch.Applications
-            .Where(a => a.CurrentStatus >= Domain.ApplicationStatuses.SUBMITTED)
+            _jobsTracked = jobSearch.Applications.Count;
+            _statistics.Add(new StatisticEntry { Title = "Opportunities", Value = _jobsTracked });
+
+            _jobsAppliedTo = jobSearch.Applications
+                .Where(a => a.CurrentStatus >= Domain.ApplicationStatuses.SUBMITTED)
+                .Count();
+            _statistics.Add(new StatisticEntry { Title = "Total Applications", Value = _jobsAppliedTo });
+
+            _openApplications = jobSearch.Applications
+                .Where(a => a.CurrentStatus >= Domain.ApplicationStatuses.SUBMITTED)
+                .Where(a => a.CurrentStatus != Domain.ApplicationStatuses.CLOSED)
+                .Count();
+            _statistics.Add(new StatisticEntry { Title = "Open Applications", Value = _openApplications });
+
+            _employerContacts = jobSearch.Applications
+                .Where(n => n.HasContact)
+                .Count();
+            _statistics.Add(new StatisticEntry { Title = "Employer Contacts", Value = _employerContacts });
+
+            _rejections = jobSearch.Applications.
+            Where(a => a.Resolution == Domain.ApplicationResolutions.REJECTED)
             .Count();
-        _statistics.Add(new StatisticEntry { Title = "Total Applications", Value = _jobsAppliedTo });
-
-        _openApplications = jobSearch.Applications
-            .Where(a => a.CurrentStatus >= Domain.ApplicationStatuses.SUBMITTED)
-            .Where(a => a.CurrentStatus != Domain.ApplicationStatuses.CLOSED)
-            .Count();
-        _statistics.Add(new StatisticEntry { Title = "Open Applications", Value = _openApplications });
-
-        _employerContacts = jobSearch.Applications
-            .Where(n => n.HasContact)
-            .Count();
-        _statistics.Add(new StatisticEntry { Title = "Employer Contacts", Value = _employerContacts });
-
-        _rejections = jobSearch.Applications.
-        Where(a => a.Resolution == Domain.ApplicationResolutions.REJECTED)
-        .Count();
-        _statistics.Add(new StatisticEntry { Title = "Rejections", Value = _rejections });
+            _statistics.Add(new StatisticEntry { Title = "Rejections", Value = _rejections });
+        }
 
         _isLoading = false;
         StateHasChanged();

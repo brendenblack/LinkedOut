@@ -1,0 +1,51 @@
+﻿@if (_isEdit)
+{
+
+}
+else
+{
+    <div class="viewmode">
+        @if (string.IsNullOrWhiteSpace(_contents))
+        {
+            <Empty>
+                <DescriptionTemplate>
+                    No description has been provided
+                </DescriptionTemplate>
+            </Empty>
+        }
+        else if (Format == Formats.MARKDOWN)
+        {
+            @("Markdown content is not supported")
+        }
+        else if (Format == Formats.HTML)
+        {
+            @((MarkupString)_contents)
+        }
+        else
+        {
+            @_contents
+        }
+    </div>
+}
+
+
+@code {
+    [Parameter]
+    public string Contents { get; set; }
+
+    string _contents;
+
+    [Parameter]
+    public bool Editable { get; set; } = false;
+
+    [Parameter]
+    public Formats Format { get; set; } = Formats.PLAINTEXT;
+
+    bool _isEdit = false;
+
+    protected override void OnParametersSet()
+    {
+       
+        base.OnParametersSet();
+    }
+}
