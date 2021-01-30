@@ -35,6 +35,9 @@ namespace LinkedOut.Infrastructure.Persistence.Migrations.SQLServer
                     b.Property<string>("CreatedBy")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
                     b.Property<string>("JobDescription")
                         .HasColumnType("nvarchar(max)");
 
@@ -85,6 +88,9 @@ namespace LinkedOut.Infrastructure.Persistence.Migrations.SQLServer
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
                     b.Property<DateTime?>("LastModified")
                         .HasColumnType("datetime2");
 
@@ -124,6 +130,9 @@ namespace LinkedOut.Infrastructure.Persistence.Migrations.SQLServer
                     b.Property<string>("CreatedBy")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
                     b.Property<DateTime?>("LastModified")
                         .HasColumnType("datetime2");
 
@@ -140,7 +149,7 @@ namespace LinkedOut.Infrastructure.Persistence.Migrations.SQLServer
 
                     b.HasIndex("ApplicationId");
 
-                    b.ToTable("Note");
+                    b.ToTable("Notes");
                 });
 
             modelBuilder.Entity("LinkedOut.Domain.Entities.Offer", b =>
@@ -169,6 +178,9 @@ namespace LinkedOut.Infrastructure.Persistence.Migrations.SQLServer
                         .HasColumnType("datetime2");
 
                     b.Property<bool>("IsAccepted")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
                     b.Property<DateTime?>("LastModified")

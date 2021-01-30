@@ -38,6 +38,7 @@ namespace LinkedOut.Application.JobSearches.Queries.GetJobApplication
                 .ProjectTo<JobApplicationDto>(_mapper.ConfigurationProvider)
                 .FirstOrDefaultAsync();
 
+
             return dto;
 
         }

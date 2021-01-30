@@ -128,6 +128,7 @@ namespace LinkedOut.Blazor
             services.AddSingleton<BlazorServerAuthStateCache>();
             services.AddScoped<AuthenticationStateProvider, BlazorServerAuthState>();
 
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

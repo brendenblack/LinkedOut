@@ -1,9 +1,15 @@
 ﻿
 function initializeRichTextEditor(id) {
     console.log(`Initializing RichTextEditor for element ${id}`);
-    var editor1cfg = {}
-    editor1cfg.toolbar = "basic";   
-    var editor = new RichTextEditor(id, editor1cfg); 
+    var config = {};
+    config.toolbar = "basic";
+    config.editorResizeMode = "height";
+    config.showFloatParagraph = false;
+    
+    console.log('RTE configuration', config);
+    
+    var editor = new RichTextEditor(id, config);
+
     console.log('Reference created', editor);
     return editor;
 }
@@ -16,4 +22,9 @@ function getEditorContentAsHtml(editor) {
     console.log('Getting editor content');
     console.log(editor);
     return editor.getHTMLCode();
+}
+
+function setEditorContent(editor, contents) {
+    console.log('Setting editor contents', contents);
+    editor.setHTMLCode(contents);
 }

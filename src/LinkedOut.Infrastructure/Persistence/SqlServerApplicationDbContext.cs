@@ -2,6 +2,7 @@
 using LinkedOut.Domain.Common;
 using LinkedOut.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,14 +15,17 @@ namespace LinkedOut.Infrastructure.Persistence
 {
     public class SqlServerApplicationDbContext : DbContext, IApplicationDbContext
     {
+        private readonly ILogger<SqlServerApplicationDbContext> _logger;
         private readonly ICurrentUserService _currentUserService;
         private readonly IDateTime _dateTime;
 
         public SqlServerApplicationDbContext(
+            ILogger<SqlServerApplicationDbContext> logger,
             DbContextOptions<SqlServerApplicationDbContext> options,
             ICurrentUserService currentUserService,
             IDateTime dateTime) : base(options)
         {
+            _logger = logger;
             _currentUserService = currentUserService;
             _dateTime = dateTime;
         }
@@ -29,6 +33,8 @@ namespace LinkedOut.Infrastructure.Persistence
         public DbSet<JobApplication> JobApplications { get; set; }
 
         public DbSet<JobSearch> JobSearches { get; set; }
+
+        public DbSet<Note> Notes { get; set; }
 
         public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = new CancellationToken())
         {
@@ -45,6 +51,14 @@ namespace LinkedOut.Infrastructure.Persistence
                         entry.Entity.LastModifiedBy = _currentUserService.UserId;
                         entry.Entity.LastModified = _dateTime.Now;
                         break;
+                    // prevent physical deletion of AuditableEntities, but still allow the use of Remove and RemoveRange
+                    // here, we first set the state to be unchanged, and then modify the IsDeleted field before allowing the save
+                    // https://www.ryansouthgate.com/2019/01/07/entity-framework-core-soft-delete/
+                    // https://docs.microsoft.com/en-us/ef/core/querying/filters#disabling-filters
+                    case EntityState.Deleted:
+                        entry.State = EntityState.Unchanged;
+                        entry.Entity.IsDeleted = true;
+                        break;
                 }
             }
 
@@ -56,6 +70,24 @@ namespace LinkedOut.Infrastructure.Persistence
         protected override void OnModelCreating(ModelBuilder builder)
         {
             builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
+
+
+            //foreach (var property in this.GetType().GetProperties())
+            //{
+            //    var _type = property.PropertyType;
+            //    var isDbSet = property.PropertyType.IsGenericType && (typeof(DbSet<>).IsAssignableFrom(property.PropertyType.GetGenericTypeDefinition()));
+            //    if (isDbSet)
+            //    {
+            //        var genericType = property.PropertyType.GetGenericTypeDefinition();
+            //        if (genericType.IsAssignableFrom(typeof(AuditableEntity)))
+            //        {
+            //            _logger.LogDebug("Adding a query filter to type {DbSetType}", property.PropertyType.Name);
+            //            builder.Entity<AuditableEntity>(t => t.HasQueryFilter(a => !a.IsDeleted));
+            //        }
+            //    }
+            //}
+
+
 
             base.OnModelCreating(builder);
         }

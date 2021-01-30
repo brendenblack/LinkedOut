@@ -7,22 +7,37 @@
 @inject IJSRuntime _js
 
 <Layout>
-    @if (_opportunity != null)
-    {
-        <PageHeader Title="@_pageTitle">
-        </PageHeader>
+    <Row>
+        @if (_opportunity != null && !_opportunity.DidApply)
+        {
+            <Button Style="primary" Icon="save">Submit</Button>
+        }
+        else
+        {
+            <Button Style="primary" Icon="save">Update</Button>
+        }
 
-        <Content>
-            <Spin Spinning="_loading">
-                <div id="resume">
-                    <p>Hire me, <strong>please</strong>.</p>
-                </div>
-                <Button OnClick="handleApplyClick">Apply</Button>
-            </Spin>
-        </Content>
-        
-        
-    }
+    </Row>
+    <Row Style="background-color: #ffffff;">
+        <AntDesign.Col Xs="24" Xl="8">
+            <Card Title="Resumé">
+                <div id="resume-editor"></div>
+            </Card>
+        </AntDesign.Col>
+        <AntDesign.Col Xs="24" Xl="8">
+            <Card Title="Cover Letter">
+                <div id="coverletter-editor"></div>
+            </Card>
+        </AntDesign.Col>
+        <AntDesign.Col Xs="24" Xl="8">
+            <Card Title="@((_opportunity == null) ? "Job description" : $"{_opportunity.JobTitle} description")" Loading="@_isFetchingDescription">
+                @if (_opportunity != null)
+                {
+                    @((MarkupString)_opportunity.JobDescription)
+                }
+            </Card>
+        </AntDesign.Col>
+    </Row>
 </Layout>
 
 @code {
@@ -34,6 +49,8 @@
 
     JobOpportunityDto _opportunity;
 
+    bool _isFetchingDescription = false;
+
     bool _loading = false;
 
     string _pageTitle = "";
@@ -42,14 +59,15 @@
 
     string _contents;
 
-    IJSObjectReference editor;
+    IJSObjectReference resumeEditor;
+    IJSObjectReference coverLetterEditor;
 
     private async Task handleApplyClick()
     {
         _loading = true;
         StateHasChanged();
 
-        var contents = await _js.InvokeAsync<string>("getEditorContentAsHtml", editor);
+        var contents = await _js.InvokeAsync<string>("getEditorContentAsHtml", resumeEditor);
         var command = new SubmitApplicationCommand
         {
             JobApplicationId = OpportunityId,
@@ -70,9 +88,9 @@
 
     private async Task Update()
     {
-        if (!_loading)
+        if (!_isFetchingDescription)
         {
-            _loading = true;
+            _isFetchingDescription = true;
             StateHasChanged();
         }
 
@@ -80,13 +98,7 @@
 
         _opportunity = await _mediator.Send(query);
 
-        if (_opportunity != null)
-        {
-            _pageTitle = $"Application for {_opportunity.JobTitle} at {_opportunity.OrganizationName}";
-            _isSubmitted = _opportunity.DidApply;
-        }
-
-        _loading = false;
+        _isFetchingDescription = false;
         StateHasChanged();
     }
 
@@ -94,7 +106,8 @@
     {
         if (firstRender)
         {
-            editor = await _js.InvokeAsync< IJSObjectReference>("initializeRichTextEditor", "#resume");
+            resumeEditor = await _js.InvokeAsync< IJSObjectReference>("initializeRichTextEditor", "#resume-editor");
+            //coverLetterEditor = await _js.InvokeAsync< IJSObjectReference>("initializeRichTextEditor", "#coverletter-editor");
         }
 
         await base.OnAfterRenderAsync(firstRender);

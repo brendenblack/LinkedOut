@@ -13,9 +13,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LinkedOut.Application", "sr
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LinkedOut.Infrastructure", "src\LinkedOut.Infrastructure\LinkedOut.Infrastructure.csproj", "{55F78959-3F93-4C11-B300-A57A4B731D92}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LinkedOut.Application.UnitTests", "test\LinkedOut.Application.UnitTests\LinkedOut.Application.UnitTests.csproj", "{4956F744-A38B-4860-AD04-58A29A01B37F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LinkedOut.Application.UnitTests", "test\LinkedOut.Application.UnitTests\LinkedOut.Application.UnitTests.csproj", "{4956F744-A38B-4860-AD04-58A29A01B37F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LinkedOut.Application.IntegrationTests", "test\LinkedOut.Application.IntegrationTests\LinkedOut.Application.IntegrationTests.csproj", "{B199A66F-F03B-41CA-8810-F67C25B2199D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LinkedOut.Application.IntegrationTests", "test\LinkedOut.Application.IntegrationTests\LinkedOut.Application.IntegrationTests.csproj", "{B199A66F-F03B-41CA-8810-F67C25B2199D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

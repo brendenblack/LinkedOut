@@ -102,7 +102,20 @@
 
                     _logger.LogDebug("Sending {CommandType}: {@Command}", command.GetType().Name, command);
                     var updateResult = await _mediator.Send(command);
-
+                    if (updateResult.IsSuccess)
+                    {
+                        if (OnUpdate.HasDelegate)
+                        {
+                            await OnUpdate.InvokeAsync(Model.JobApplicationId.Value);
+                        }
+                    }
+                    else
+                    {
+                        foreach (var reason in updateResult.Reasons)
+                        {
+                            _logger.LogWarning("Failure reason: {Reason} {@Metadata}", reason.Message, reason.Metadata);
+                        }
+                    }
                 }
                 else
                 {
@@ -118,7 +131,23 @@
 
                     _logger.LogDebug("Sending {CommandType}: {@Command}", command.GetType().Name, command);
                     var addResult = await _mediator.Send(command);
+                    if (addResult.IsSuccess)
+                    {
+                        if (OnCreate.HasDelegate)
+                        {
+                            await OnCreate.InvokeAsync(addResult.Value);
+                        }
+                    }
+                    else
+                    {
+                        foreach (var reason in addResult.Reasons)
+                        {
+                            _logger.LogWarning("Failure reason: {Reason} {@Metadata}", reason.Message, reason.Metadata);
+                        }
+                    }
                 }
+                
+                _isVisible = false;
             }
             catch (Exception addOrUpdateException)
             {

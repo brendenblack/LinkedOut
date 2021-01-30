@@ -83,6 +83,7 @@
 
             <Content Class="site-layout-background" Style=" padding: 24px; margin: 0; min-height: 280px; background-color: white;">
                 <Space Direction="vertical" Size="large" Style="width: 100%">
+                    <div class="statistics">
                     <SpaceItem>
                         <Row Gutter="16" Justify="space-between">
                             @foreach (var statistic in _statistics)
@@ -114,10 +115,9 @@
                                 <Statistic Title="Days In Progress" Value="@_daysInProgress" />
                             </SpaceItem>*@
                         </Row>
+                        <Divider Class="statistics" />
                     </SpaceItem>
-                    <SpaceItem>
-                        <Divider />
-                    </SpaceItem>
+                    </div>
                     <SpaceItem>
                         <Title Level="3">Opportunities</Title>
                             @if (jobSearch.Applications.Count == 0)
@@ -144,21 +144,8 @@
                             </TitleTemplate>
                         </Column>
                         <Column @bind-Field="@context.Created" Sortable>@context.Created.ToShortDateString()</Column>
-                        <Column @bind-Field="@context.CurrentStatus" Title="" Sortable>
-                            @switch (context.CurrentStatus)
-                                    {
-                                        case Domain.ApplicationStatuses.INPROGRESS:
-                                    <Tag Color="gold">interested</Tag>
-                                            break;
-                                        case Domain.ApplicationStatuses.SUBMITTED:
-                                    <Tag Color="green">submitted</Tag>
-                                            break;
-                                        case Domain.ApplicationStatuses.CLOSED:
-                                    <Tag>closed</Tag>
-                                            break;
-                                        default:
-                                            break;
-                                    }
+                        <Column @bind-Field="@context.CurrentStatus" Title="Status" Sortable>
+                            <StatusTag Status="@context.CurrentStatus" />
                         </Column>
                         <Column @bind-Field="@context.AppliedOn" Sortable>
                             @if (context.DidApply)
@@ -186,19 +173,19 @@
 
 
 @code {
-        [Parameter]
-        public int JobSearchId { get; set; }
+    [Parameter]
+    public int JobSearchId { get; set; }
 
-        JobSearchDto jobSearch;
-        int _jobsTracked = 0;
-        int _jobsAppliedTo = 0;
-        int _openApplications = 0;
-        int _employerContacts = 0;
-        int _rejections = 0;
-        int _daysInProgress = 0;
-        List<StatisticEntry> _statistics = new();
+    JobSearchDto jobSearch;
+    int _jobsTracked = 0;
+    int _jobsAppliedTo = 0;
+    int _openApplications = 0;
+    int _employerContacts = 0;
+    int _rejections = 0;
+    int _daysInProgress = 0;
+    List<StatisticEntry> _statistics = new();
 
-        bool _isLoading = false;
+    bool _isLoading = false;
 
     private EditJobDescriptionModal editJobDescriptionModal;
     private void handleAddJobPostingClick()
@@ -206,7 +193,7 @@
         editJobDescriptionModal.Show();
     }
 
-    private async Task handleJobApplicationCreate()
+    private async Task handleJobApplicationCreate(int createdId)
     {
         await UpdateJobSearch();
     }
@@ -245,13 +232,13 @@
             _statistics.Add(new StatisticEntry { Title = "Opportunities", Value = _jobsTracked });
 
             _jobsAppliedTo = jobSearch.Applications
-                .Where(a => a.CurrentStatus >= Domain.ApplicationStatuses.SUBMITTED)
+                .Where(a => a.CurrentStatus >= ApplicationStatuses.SUBMITTED)
                 .Count();
             _statistics.Add(new StatisticEntry { Title = "Total Applications", Value = _jobsAppliedTo });
 
             _openApplications = jobSearch.Applications
-                .Where(a => a.CurrentStatus >= Domain.ApplicationStatuses.SUBMITTED)
-                .Where(a => a.CurrentStatus != Domain.ApplicationStatuses.CLOSED)
+                .Where(a => a.CurrentStatus >= ApplicationStatuses.SUBMITTED)
+                .Where(a => a.CurrentStatus != ApplicationStatuses.CLOSED)
                 .Count();
             _statistics.Add(new StatisticEntry { Title = "Open Applications", Value = _openApplications });
 
@@ -260,10 +247,10 @@
                 .Count();
             _statistics.Add(new StatisticEntry { Title = "Employer Contacts", Value = _employerContacts });
 
-            _rejections = jobSearch.Applications.
-            Where(a => a.Resolution == Domain.ApplicationResolutions.REJECTED)
-            .Count();
-            _statistics.Add(new StatisticEntry { Title = "Rejections", Value = _rejections });
+            //_rejections = jobSearch.Applications.
+            //Where(a => a.Resolution == Domain.ApplicationResolutions.REJECTED)
+            //.Count();
+            //_statistics.Add(new StatisticEntry { Title = "Rejections", Value = _rejections });
         }
 
         _isLoading = false;

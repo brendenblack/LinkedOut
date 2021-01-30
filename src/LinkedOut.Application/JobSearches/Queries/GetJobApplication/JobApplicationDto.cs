@@ -12,11 +12,9 @@ namespace LinkedOut.Application.JobSearches.Queries.GetJobApplication
     {
         public int Id { get; set; }
 
+        public int OpportunityId { get; set; }
+
         public int ParentSearchId { get; set; }
-
-        public string ParentSearchTitle { get; set; }
-
-        public string OrganizationName { get; set; }
 
         public DateTime? SubmittedOn { get; set; }
 
@@ -28,19 +26,15 @@ namespace LinkedOut.Application.JobSearches.Queries.GetJobApplication
 
         public ApplicationResolutions Resolution { get; set; }
 
-        public string LocationCityName { get; set; }
-
-        public string LocationProvince { get; set; }
-
         public string Resume { get; set; }
+
+        public Formats ResumeFormat { get; set; }
 
         public string CoverLetter { get; set; }
 
-        public string JobTitle { get; set; }
+        public Formats CoverLetterFormat => Formats.HTML;
 
         public bool IsClosed { get; set; }
-
-        public string JobDescription { get; set; }
 
         public List<NoteDto> Notes { get; set; }
 
@@ -55,7 +49,8 @@ namespace LinkedOut.Application.JobSearches.Queries.GetJobApplication
                         s => s.Transitions
                             .Where(t => t.TransitionTo == ApplicationStatuses.SUBMITTED)
                             .Select(t => t.Timestamp)
-                            .FirstOrDefault()));
+                            .FirstOrDefault()))
+                .ForMember(d => d.OpportunityId, o => o.MapFrom(s => s.Id));
         }
     }
 }

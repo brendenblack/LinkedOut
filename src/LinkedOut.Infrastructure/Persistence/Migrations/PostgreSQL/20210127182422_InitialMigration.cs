@@ -4,7 +4,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace LinkedOut.Infrastructure.Persistence.Migrations.PostgreSQL
 {
-    public partial class InitialCommit : Migration
+    public partial class InitialMigration : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -20,7 +20,8 @@ namespace LinkedOut.Infrastructure.Persistence.Migrations.PostgreSQL
                     created = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     created_by = table.Column<string>(type: "text", nullable: true),
                     last_modified = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
-                    last_modified_by = table.Column<string>(type: "text", nullable: true)
+                    last_modified_by = table.Column<string>(type: "text", nullable: true),
+                    is_deleted = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -46,7 +47,8 @@ namespace LinkedOut.Infrastructure.Persistence.Migrations.PostgreSQL
                     created = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     created_by = table.Column<string>(type: "text", nullable: true),
                     last_modified = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
-                    last_modified_by = table.Column<string>(type: "text", nullable: true)
+                    last_modified_by = table.Column<string>(type: "text", nullable: true),
+                    is_deleted = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -60,7 +62,7 @@ namespace LinkedOut.Infrastructure.Persistence.Migrations.PostgreSQL
                 });
 
             migrationBuilder.CreateTable(
-                name: "note",
+                name: "notes",
                 columns: table => new
                 {
                     id = table.Column<int>(type: "integer", nullable: false)
@@ -73,13 +75,14 @@ namespace LinkedOut.Infrastructure.Persistence.Migrations.PostgreSQL
                     created = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     created_by = table.Column<string>(type: "text", nullable: true),
                     last_modified = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
-                    last_modified_by = table.Column<string>(type: "text", nullable: true)
+                    last_modified_by = table.Column<string>(type: "text", nullable: true),
+                    is_deleted = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("pk_note", x => x.id);
+                    table.PrimaryKey("pk_notes", x => x.id);
                     table.ForeignKey(
-                        name: "fk_note_job_applications_application_id",
+                        name: "fk_notes_job_applications_application_id",
                         column: x => x.application_id,
                         principalTable: "job_applications",
                         principalColumn: "id",
@@ -102,7 +105,8 @@ namespace LinkedOut.Infrastructure.Persistence.Migrations.PostgreSQL
                     created = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     created_by = table.Column<string>(type: "text", nullable: true),
                     last_modified = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
-                    last_modified_by = table.Column<string>(type: "text", nullable: true)
+                    last_modified_by = table.Column<string>(type: "text", nullable: true),
+                    is_deleted = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -144,8 +148,8 @@ namespace LinkedOut.Infrastructure.Persistence.Migrations.PostgreSQL
                 column: "parent_search_id");
 
             migrationBuilder.CreateIndex(
-                name: "ix_note_application_id",
-                table: "note",
+                name: "ix_notes_application_id",
+                table: "notes",
                 column: "application_id");
 
             migrationBuilder.CreateIndex(
@@ -163,7 +167,7 @@ namespace LinkedOut.Infrastructure.Persistence.Migrations.PostgreSQL
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "note");
+                name: "notes");
 
             migrationBuilder.DropTable(
                 name: "offer");

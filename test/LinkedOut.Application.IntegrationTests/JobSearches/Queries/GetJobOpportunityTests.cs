@@ -3,9 +3,6 @@ using LinkedOut.Domain.Entities;
 using LinkedOut.Domain.ValueObjects;
 using Shouldly;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
@@ -38,7 +35,7 @@ namespace LinkedOut.Application.IntegrationTests.JobSearches.Queries
             result.JobTitle.ShouldBe("Delivery Boy");
         }
 
-        #region Status tests
+        #region Applied status
         [Fact]
         public async Task ShouldIndicateNotApplied_WhenNotSubmitted()
         {
@@ -51,7 +48,6 @@ namespace LinkedOut.Application.IntegrationTests.JobSearches.Queries
             var result = await SendAsync(query);
 
             result.DidApply.ShouldBeFalse();
-
         }
 
         [Fact]
@@ -67,34 +63,10 @@ namespace LinkedOut.Application.IntegrationTests.JobSearches.Queries
             var result = await SendAsync(query);
 
             result.DidApply.ShouldBeTrue();
-
         }
         #endregion
 
-        #region Note tests
-        [Fact]
-        public async Task ShouldIncludeNoteAndIdentifySelfAuthored()
-        {
-            var userId = await RunAsDefaultUserAsync();
-            var search = new JobSearch(userId);
-            var application = new JobApplication(search, "Planet Express", "Delivery Boy");
-            application.RecordEmployerContact("You'll be responsible for ensuring that the cargo reaches its destination.", "Professor Farnsworth");
-            application.AddNote("Alright! I'm a delivery boy!");
-            await AddAsync(application);
-            var query = new GetJobOpportunityQuery { JobOpportunityId = application.Id };
-
-            var result = await SendAsync(query);
-
-            var selfAuthoredNote = result.Notes.FirstOrDefault(n => n.IsSelfAuthored);
-            selfAuthoredNote.ShouldNotBeNull();
-            selfAuthoredNote.Author.ShouldBe(Note.SelfAuthoredAuthor);
-            selfAuthoredNote.Contents.ShouldBe("Alright! I'm a delivery boy!");
-            var contact = result.Notes.FirstOrDefault(n => n.Author == "Professor Farnsworth");
-            contact.ShouldNotBeNull();
-            contact.Contents.ShouldBe("You'll be responsible for ensuring that the cargo reaches its destination.");
-        }
-        #endregion
-
+        
         #region Location tests
         [Fact]
         public async Task ShouldReturnPartsUnknown_WhenNoLocation()

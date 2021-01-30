@@ -1,0 +1,134 @@
+﻿@using LinkedOut.Application.JobSearches.Queries.GetJobApplication
+
+<nav class="actions">
+    @if (JobApplication.CurrentStatus == ApplicationStatuses.INPROGRESS)
+    {
+        <Button Type="primary" Icon="plus" OnClick="@(() => OnSubmitClick.InvokeAsync())"><span class="action-button-text">I have applied</span></Button>
+    }
+    else if (JobApplication.CurrentStatus == ApplicationStatuses.SUBMITTED)
+    {
+        <Button type="primary" Icon="check-circle" OnClick="OnHiredClick">They hired me!</Button>
+        <Button Danger Icon="close-circle">They rejected me</Button>
+    }
+    else if (JobApplication.CurrentStatus == ApplicationStatuses.CLOSED)
+    {
+        <Button Icon="undo" OnClick="OnReopenClick"><span class="action-button-text">Reopen</span></Button>
+    }
+
+    <Dropdown Overlay="@secondaryActions" Placement="@PlacementType.BottomRight">
+        <ChildContent>
+            <Button Icon="ellipsis" />
+        </ChildContent>
+    </Dropdown>
+</nav>
+
+@code {
+
+    //RenderFragment employerContactButton;
+
+    RenderFragment secondaryActions = @<Menu></Menu>;
+
+    [Parameter]
+    public JobApplicationDto JobApplication { get; set; }
+
+    [Parameter]
+    public EventCallback OnSubmitClick { get; set; }
+
+    [Parameter]
+    public EventCallback OnCloseClick { get; set; }
+
+    [Parameter]
+    public EventCallback OnDeleteClick { get; set; }
+
+    [Parameter]
+    public EventCallback OnReopenClick { get; set; }
+
+    [Parameter]
+    public EventCallback OnHiredClick { get; set; }
+
+    [Parameter]
+    public EventCallback OnRejectedClick { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        // as a side note, this is the worst component i've ever made and I hated every second of it
+
+        //employerContactButton = @<Button Icon="comment" OnClick="(() => OnEmployerContactClick.InvokeAsync())"><span class="button-text">Record contact</span></Button>;
+
+        if (JobApplication.CurrentStatus == ApplicationStatuses.INPROGRESS)
+        {
+            secondaryActions = @<Menu>
+                <MenuItem Key="1" OnClick="(() => OnCloseClick.InvokeAsync())">Close</MenuItem>
+                <MenuItem Key="2" OnClick="(() => OnDeleteClick.InvokeAsync())"><Icon Type="delete" /> Delete</MenuItem>
+            </Menu>;
+        }
+        else if (JobApplication.CurrentStatus == ApplicationStatuses.SUBMITTED)
+        {
+            secondaryActions = @<Menu>
+                <MenuItem Key="1" OnClick="(() => OnCloseClick.InvokeAsync())">Withdraw application</MenuItem>
+                <MenuItem Key="2" OnClick="(() => OnCloseClick.InvokeAsync())">Close</MenuItem>
+                <MenuItem Key="3" OnClick="(() => OnDeleteClick.InvokeAsync())">Delete</MenuItem>
+            </Menu>;
+        }
+        else if (JobApplication.CurrentStatus == ApplicationStatuses.CLOSED)
+        {
+            secondaryActions = @<Menu>
+                <MenuItem Key="1" OnClick="(() => OnDeleteClick.InvokeAsync())">Delete</MenuItem>
+            </Menu>;
+        }
+
+        await base.OnParametersSetAsync();
+    }
+
+    private async Task handleSubmitClick()
+    {
+
+    }
+
+    private async Task handleRejectedClick()
+    {
+
+    }
+
+    private async Task handleHiredClick()
+    {
+
+    }
+
+    private async Task handleCloseClick()
+    {
+
+    }
+
+    private async Task handleDeleteClick()
+    {
+
+    }
+
+    private async Task handleReopenClick()
+    {
+
+    }
+
+    private async Task handleWithdrawClick()
+    {
+        //var command = new TransitionApplicationCommand
+    }
+
+    //private async Task handleAppliedClick()
+    //{
+    //    var command = new SubmitApplicationCommand { JobApplicationId = _application.Id, Timestamp = DateTime.Now };
+    //    var result = await _mediator.Send(command);
+    //    if (result.IsSuccess)
+    //    {
+    //        await UpdateApplication();
+    //    }
+    //    else
+    //    {
+    //        foreach (var reason in result.Reasons)
+    //        {
+    //            _message.Error(reason.Message);
+    //        }
+    //    }
+    //}
+}

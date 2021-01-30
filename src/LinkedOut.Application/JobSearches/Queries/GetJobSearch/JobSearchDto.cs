@@ -26,7 +26,7 @@ namespace LinkedOut.Application.JobSearches.Queries.GetJobSearch
         public void MapFrom(Profile profile)
         {
             profile.CreateMap<JobSearch, JobSearchDto>()
-                .ForMember(s => s.IsActive, opt => opt.MapFrom(d => !d.Applications.Any(a => a.Resolution == Domain.ApplicationResolutions.OFFER_ACCEPTED)));
+                .ForMember(s => s.IsActive, opt => opt.MapFrom(d => !d.Applications.Any(a => a.Resolution == ApplicationResolutions.OFFER_ACCEPTED)));
         }
     }
 }

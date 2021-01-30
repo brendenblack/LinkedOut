@@ -19,6 +19,7 @@ using Xunit.Abstractions;
 
 namespace LinkedOut.Application.IntegrationTests
 {
+    [Collection("integration tests")]
     public class TestBase
     {
         protected IConfigurationRoot _configuration;
@@ -147,9 +148,9 @@ namespace LinkedOut.Application.IntegrationTests
 
             var context = scope.ServiceProvider.GetService<SqlServerApplicationDbContext>();
 
-
             return await context.FindAsync<TEntity>(id);
         }
+
 
         public async Task<TEntity> FindAsync<TEntity>(int id, string[] referenceIncludes = null, string[] collectionIncludes = null)
             where TEntity : class
@@ -185,7 +186,7 @@ namespace LinkedOut.Application.IntegrationTests
         /// /// </remarks>
         public SqlServerApplicationDbContext GetContext()
         {
-            using var scope = _scopeFactory.CreateScope();
+            var scope = _scopeFactory.CreateScope();
 
             return scope.ServiceProvider.GetService<SqlServerApplicationDbContext>();
         }

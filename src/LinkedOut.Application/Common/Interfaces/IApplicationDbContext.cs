@@ -11,6 +11,8 @@ namespace LinkedOut.Application.Common.Interfaces
 
         public DbSet<JobSearch> JobSearches { get; }
 
+        public DbSet<Note> Notes { get; }
+
         Task<int> SaveChangesAsync(CancellationToken cancellationToken);
     }
 }

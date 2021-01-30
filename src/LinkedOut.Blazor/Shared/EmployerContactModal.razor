@@ -1,0 +1,155 @@
+﻿@using LinkedOut.Application.JobSearches.Commands
+@using System.ComponentModel.DataAnnotations
+
+@inject MediatR.IMediator _mediator;
+@inject ICurrentUserService _currentUserService;
+@inject ILogger<EmployerContactModal> _logger
+
+@{
+    RenderFragment footer = @<Template>
+        <Button OnClick="@handleOk" @key="@( "submit" )"
+                HtmlType="submit"
+                Type="@ButtonType.Primary"
+                Loading="@_loading">
+            <Icon Type="plus" Theme="outline" /> Add
+        </Button>
+        <Button OnClick="@handleCancel" @key="@( "back" )" Disabled="_loading">Cancel</Button>
+    </Template>;
+}
+
+<Modal Title="Record contact from the employer"
+       Visible="@_isVisible"
+       OnOk="@handleOk"
+       OnCancel="@handleCancel"
+       Footer="@footer">
+    <Form Model="@model"
+          @ref="form"
+          LabelColSpan="6"
+          WrapperColSpan="18">
+        <FormItem Label="Author">
+            <Input @bind-Value="@context.Author" Placeholder="Professor Farnsworth" />
+        </FormItem>
+
+        <FormItem Label="Date received">
+            <DatePicker @bind-Value="@context.Timestamp" TValue="DateTime" Format="yyyy-MM-dd HH:MM:ss" ShowTime="@true" />
+        </FormItem>
+        
+        <FormItem Label="Message">
+            <TextArea @bind-Value="@context.Message" Placeholder="@_placeholder" MinRows="4" MaxRows="8" />
+        </FormItem>
+    </Form>
+</Modal>
+
+@code {
+    [Parameter]
+    public EventCallback<int> OnSave { get; set; }
+
+    bool _isVisible = false;
+    bool _loading = false;
+    Form<EmployerContactFormModel> form;
+    EmployerContactFormModel model = new();
+
+
+    private async Task handleOk(MouseEventArgs e)
+    {
+        if (form.Validate())
+        {
+            _loading = true;
+            StateHasChanged();
+
+            FluentResults.Result<int> result = null;
+
+            if (model.NoteId.HasValue)
+            {
+                var command = new EditEmployerContactCommand
+                {
+                    Author = model.Author,
+                    EmployerContactId = model.NoteId.Value,
+                    Message = model.Message,
+                    Timestamp = model.Timestamp
+                };
+
+                result = await _mediator.Send(command);
+
+            }
+            else if (model.JobApplicationId.HasValue)
+            {
+                var command = new AddEmployerContactCommand
+                {
+                    Author = model.Author,
+                    JobApplicationId = model.JobApplicationId.Value,
+                    Message = model.Message,
+                    Timestamp = model.Timestamp
+                };
+
+                result = await _mediator.Send(command);
+            }
+            else
+            {
+                // TODO
+                result = FluentResults.Result.Fail("TODO");
+            }
+
+            if (result.IsSuccess)
+            {
+                _isVisible = false;
+                model = new();
+
+                if (OnSave.HasDelegate)
+                {
+                    await OnSave.InvokeAsync(result.Value);
+                }
+            }
+            else
+            {
+                // TODO
+                _logger.LogWarning("Something went wrong: {@Message}", result.Reasons);
+            }
+
+            _loading = false;
+            StateHasChanged();
+        }
+        else
+        {
+            _logger.LogDebug("Invalid employer contact form: {@FormContent}", model);
+        }
+    }
+
+    private void handleCancel(MouseEventArgs e)
+    {
+        _isVisible = false;
+        StateHasChanged();
+    }
+
+    public void Show()
+    {
+        setPlaceholder();
+        _isVisible = true;
+        StateHasChanged();
+    }
+
+    public void SetContents(EmployerContactFormModel model)
+    {
+        this.model = model;
+
+        StateHasChanged();
+    }
+
+    #region Placeholder
+    List<string> _placeholders = new List<string>
+    {
+        "Good news, everyone!",
+        "I don't want to live on this planet anymore",
+        "Your mouth just wrote a Paypal request tranfser that your butt has insufficient funds to honor",
+
+    };
+    string _placeholder;
+
+    private void setPlaceholder()
+    {
+        Random random = new Random();
+        int index = random.Next(0, _placeholders.Count);
+        _placeholder = _placeholders[index];
+    }
+    #endregion
+}

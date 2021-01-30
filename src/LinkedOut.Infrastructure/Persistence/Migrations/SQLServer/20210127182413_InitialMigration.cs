@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace LinkedOut.Infrastructure.Persistence.Migrations.SQLServer
 {
-    public partial class InitialCommit : Migration
+    public partial class InitialMigration : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -19,7 +19,8 @@ namespace LinkedOut.Infrastructure.Persistence.Migrations.SQLServer
                     Created = table.Column<DateTime>(type: "datetime2", nullable: false),
                     CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     LastModified = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    LastModifiedBy = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    LastModifiedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -45,7 +46,8 @@ namespace LinkedOut.Infrastructure.Persistence.Migrations.SQLServer
                     Created = table.Column<DateTime>(type: "datetime2", nullable: false),
                     CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     LastModified = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    LastModifiedBy = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    LastModifiedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -59,7 +61,7 @@ namespace LinkedOut.Infrastructure.Persistence.Migrations.SQLServer
                 });
 
             migrationBuilder.CreateTable(
-                name: "Note",
+                name: "Notes",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -72,13 +74,14 @@ namespace LinkedOut.Infrastructure.Persistence.Migrations.SQLServer
                     Created = table.Column<DateTime>(type: "datetime2", nullable: false),
                     CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     LastModified = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    LastModifiedBy = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    LastModifiedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Note", x => x.Id);
+                    table.PrimaryKey("PK_Notes", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Note_JobApplications_ApplicationId",
+                        name: "FK_Notes_JobApplications_ApplicationId",
                         column: x => x.ApplicationId,
                         principalTable: "JobApplications",
                         principalColumn: "Id",
@@ -101,7 +104,8 @@ namespace LinkedOut.Infrastructure.Persistence.Migrations.SQLServer
                     Created = table.Column<DateTime>(type: "datetime2", nullable: false),
                     CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     LastModified = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    LastModifiedBy = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    LastModifiedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -143,8 +147,8 @@ namespace LinkedOut.Infrastructure.Persistence.Migrations.SQLServer
                 column: "ParentSearchId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Note_ApplicationId",
-                table: "Note",
+                name: "IX_Notes_ApplicationId",
+                table: "Notes",
                 column: "ApplicationId");
 
             migrationBuilder.CreateIndex(
@@ -162,7 +166,7 @@ namespace LinkedOut.Infrastructure.Persistence.Migrations.SQLServer
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Note");
+                name: "Notes");
 
             migrationBuilder.DropTable(
                 name: "Offer");

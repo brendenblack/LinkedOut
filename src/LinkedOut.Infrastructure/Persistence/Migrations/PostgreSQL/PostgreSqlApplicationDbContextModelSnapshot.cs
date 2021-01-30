@@ -39,6 +39,10 @@ namespace LinkedOut.Infrastructure.Persistence.Migrations.PostgreSQL
                         .HasColumnType("text")
                         .HasColumnName("created_by");
 
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_deleted");
+
                     b.Property<string>("JobDescription")
                         .HasColumnType("text")
                         .HasColumnName("job_description");
@@ -104,6 +108,10 @@ namespace LinkedOut.Infrastructure.Persistence.Migrations.PostgreSQL
                         .HasColumnType("text")
                         .HasColumnName("description");
 
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_deleted");
+
                     b.Property<DateTime?>("LastModified")
                         .HasColumnType("timestamp without time zone")
                         .HasColumnName("last_modified");
@@ -154,6 +162,10 @@ namespace LinkedOut.Infrastructure.Persistence.Migrations.PostgreSQL
                         .HasColumnType("text")
                         .HasColumnName("created_by");
 
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_deleted");
+
                     b.Property<DateTime?>("LastModified")
                         .HasColumnType("timestamp without time zone")
                         .HasColumnName("last_modified");
@@ -171,12 +183,12 @@ namespace LinkedOut.Infrastructure.Persistence.Migrations.PostgreSQL
                         .HasColumnName("timestamp");
 
                     b.HasKey("Id")
-                        .HasName("pk_note");
+                        .HasName("pk_notes");
 
                     b.HasIndex("ApplicationId")
-                        .HasDatabaseName("ix_note_application_id");
+                        .HasDatabaseName("ix_notes_application_id");
 
-                    b.ToTable("note");
+                    b.ToTable("notes");
                 });
 
             modelBuilder.Entity("LinkedOut.Domain.Entities.Offer", b =>
@@ -214,6 +226,10 @@ namespace LinkedOut.Infrastructure.Persistence.Migrations.PostgreSQL
                     b.Property<bool>("IsAccepted")
                         .HasColumnType("boolean")
                         .HasColumnName("is_accepted");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_deleted");
 
                     b.Property<DateTime?>("LastModified")
                         .HasColumnType("timestamp without time zone")
@@ -323,7 +339,7 @@ namespace LinkedOut.Infrastructure.Persistence.Migrations.PostgreSQL
                     b.HasOne("LinkedOut.Domain.Entities.JobApplication", "Application")
                         .WithMany("Notes")
                         .HasForeignKey("ApplicationId")
-                        .HasConstraintName("fk_note_job_applications_application_id")
+                        .HasConstraintName("fk_notes_job_applications_application_id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

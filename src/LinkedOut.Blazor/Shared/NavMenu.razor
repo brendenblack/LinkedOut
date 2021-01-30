@@ -6,14 +6,17 @@
     </div>
     @if (_currentUser.IsAuthenticated)
     {
-        <Menu Mode="MenuMode.Horizontal" Theme="MenuTheme.Dark" >
-            <SubMenu Title="Job searches">
-                <MenuItem Key="mysearches" RouterLink="/sec/jobsearch" RouterMatch="NavLinkMatch.Prefix"><MenuLink href="/sec/jobsearch">My searches</MenuLink></MenuItem>
-                <MenuItemGroup Title="Recent searches">
-                    @*<MenuItem Key="search1">Job Search 2020</MenuItem>*@
-                </MenuItemGroup>
-            </SubMenu>
-        </Menu>
+<Menu Mode="MenuMode.Horizontal" Theme="MenuTheme.Dark">
+    <MenuItem Key="mysearches" RouterLink="/sec/jobsearch" RouterMatch="NavLinkMatch.Prefix">
+        My searches
+    </MenuItem>
+    <!--<SubMenu Title="Job searches">
+        <MenuItem Key="mysearches" RouterLink="/sec/jobsearch" RouterMatch="NavLinkMatch.Prefix"><MenuLink href="/sec/jobsearch">My searches</MenuLink></MenuItem>
+        <MenuItemGroup Title="Recent searches">-->
+    @*<MenuItem Key="search1">Job Search 2020</MenuItem>*@
+    <!--</MenuItemGroup>
+    </SubMenu>-->
+</Menu>
         <span style="flex-grow: 1;"></span>
         <Menu Theme="MenuTheme.Dark" Mode="MenuMode.Horizontal">
             <SubMenu TitleTemplate="@userSubmenuTitle">

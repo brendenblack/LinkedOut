@@ -38,7 +38,6 @@ namespace LinkedOut.Application.Common.Behaviours
             {
                 _logger.LogDebug("{Name}: {@Request}", 
                     typeof(TRequest).Name,
-                    _currentUser.UserId,
                     request);
 
                 return await next();

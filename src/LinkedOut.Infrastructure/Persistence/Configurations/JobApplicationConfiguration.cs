@@ -20,6 +20,8 @@ namespace LinkedOut.Infrastructure.Persistence.Configurations
                 .HasForeignKey(e => e.ApplicationId);
 
             builder.OwnsOne(a => a.Location);
+
+            builder.HasQueryFilter(e => !e.IsDeleted);
         }
     }
 }

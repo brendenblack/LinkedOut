@@ -19,5 +19,7 @@ namespace LinkedOut.Application.JobSearches.Queries.GetJobApplication
         public string Author { get; set; }
 
         public string Contents { get; set; }
+
+        public bool IsSelfAuthored { get; set; }
     }
 }

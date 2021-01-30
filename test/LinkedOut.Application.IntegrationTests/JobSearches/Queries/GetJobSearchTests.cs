@@ -62,7 +62,7 @@ namespace LinkedOut.Application.IntegrationTests.JobSearches.Queries
 
             var applicationDto = result.Applications.FirstOrDefault(a => a.Id == app1.Id);
             applicationDto.ShouldNotBeNull();
-            applicationDto.CurrentStatus.ShouldBe(Domain.ApplicationStatuses.SUBMITTED);
+            applicationDto.CurrentStatus.ShouldBe(ApplicationStatuses.SUBMITTED);
             applicationDto.AppliedOn.HasValue.ShouldBeTrue();
             applicationDto.AppliedOn.Value.ShouldBe(DateTime.Now, TimeSpan.FromSeconds(5));
         }

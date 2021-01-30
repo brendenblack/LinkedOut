@@ -97,6 +97,8 @@ namespace LinkedOut.Domain.Entities
 
         public bool CanSubmit => CurrentStatus == ApplicationStatuses.INPROGRESS;
 
+        public bool DidApply => Transitions.Any(t => t.TransitionTo == ApplicationStatuses.SUBMITTED);
+
         public Result<StatusTransition> Submit(DateTime effectiveAsOf, string resume, Formats resumeFormat)
         {
             var transitionResult = Submit(effectiveAsOf);
@@ -125,10 +127,36 @@ namespace LinkedOut.Domain.Entities
         }        
 
         /// <summary>
+        /// Moves this application from <see cref="ApplicationStatuses.SUBMITTED"/> to <see cref="ApplicationStatuses.INPROGRESS"/>
+        /// </summary>
+        /// <param name="effectiveAsOf"></param>
+        /// <returns></returns>
+        public Result<StatusTransition> Withdraw(DateTime effectiveAsOf)
+        {
+            if (CurrentStatus != ApplicationStatuses.SUBMITTED)
+            {
+                return Result.Fail("Only applications in the ");
+            }
+
+            return Transition(ApplicationStatuses.CLOSED, effectiveAsOf, ApplicationResolutions.WITHDRAWN);
+        }
+
+        public Result<StatusTransition> Reopen(DateTime effectiveAsOf)
+        {
+            if (CurrentStatus != ApplicationStatuses.CLOSED)
+            {
+                return Result.Fail("Only applications that are closed can be reopened.");
+            }
+
+            return Transition(ApplicationStatuses.INPROGRESS, effectiveAsOf);
+        }
+
+
+        /// <summary>
         /// Transition this application from one status to another.
         /// </summary>
         /// <remarks>
-        /// This method is agnostic about workflows, and will only enforce that you cannot transition from one statu to the same status.
+        /// This method is agnostic about workflows, and will only enforce that you cannot transition from one status to the same status.
         /// Use an appropriate class that derives from <see cref="StatusWrapper"/> (e.g. <see cref="SubmittedApplication"/>) as helpers to more
         /// effective manage the status.
         /// </remarks>
@@ -143,7 +171,7 @@ namespace LinkedOut.Domain.Entities
 
             if (CurrentStatus == transitionTo)
             {
-                return Result.Fail("Unable to transition to the current status.");
+                return Result.Fail("Unable to transition because the target status is the same as the current status.");
             }
 
             if (transitionTo != ApplicationStatuses.CLOSED)
