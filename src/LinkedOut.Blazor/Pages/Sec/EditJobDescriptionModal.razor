@@ -37,7 +37,6 @@
         </FormItem>
 
         <FormItem Label="Job description">
-            @*<TextArea @bind-Value="@context.Description" MinRows="8" MaxRows="8" />*@
             <RichTextInput @bind-Value="@context.Description" />
         </FormItem>
 
@@ -140,11 +139,13 @@
                         Description = Model.Description,
                         JobTitle = Model.JobTitle,
                         OrganizationName = Model.OrganizationName,
-                        DescriptionFormat = Formats.PLAINTEXT, // only supports plain text at this point
-                        Source = Model.Source
+                        DescriptionFormat = Formats.HTML, // only supports HTML at this point
+                        Source = Model.Source,
+                        IsRemote = Model.IsRemote,
+                        LocationCityName = Model.City,
+                        LocationProvince = Model.Province
                     };
 
-                    _logger.LogDebug("Sending {CommandType}: {@Command}", command.GetType().Name, command);
                     var addResult = await _mediator.Send(command);
                     if (addResult.IsSuccess)
                     {

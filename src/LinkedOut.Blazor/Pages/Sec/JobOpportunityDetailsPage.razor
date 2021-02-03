@@ -57,17 +57,18 @@
                 <AntDesign.Col Xs="24" Lg="16" Xxl="@(new EmbeddedProperty() { Span="10", Offset = "4" })">
 
                     <Card Title="Job description">
-                        @*<RichTextContainer Contents="@_opportunity.JobDescription"
-                                           Format="@_opportunity.JobDescriptionFormat"
-                                           OnSave="handleJobDescriptionSave" />*@
-                        <div>
-                            <Button Size="small" 
-                                    Icon="edit" 
-                                    Type="primary" 
+                        <Extra>
+                            <Button Size="small"
+                                    Icon="edit"
+                                    Type="primary"
                                     Ghost
-                                    OnClick="_ => openDrawer()"></Button>
-                            @((MarkupString)_opportunity.JobDescription)
-                        </div>
+                                    OnClick="_ => openDrawer()" />
+                        </Extra>
+                        <Body>
+                            <div>
+                                @((MarkupString)_opportunity.JobDescription)
+                            </div>
+                        </Body>
                     </Card>
                 </AntDesign.Col>
                 <AntDesign.Col Xs="24" Lg="8" Xl="6">

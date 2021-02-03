@@ -1,9 +1,10 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 
 namespace LinkedOut.Domain.ValueObjects
 {
-    public class Location
+    public class Location : IComparable, IComparer
     {
         private Location() { }
 
@@ -33,6 +34,57 @@ namespace LinkedOut.Domain.ValueObjects
             }
         }
 
+
+        public override bool Equals(object obj)
+        {
+            if (!(obj is Location))
+                return false;
+
+            var other = obj as Location;
+
+            if (CityName != other.CityName || Province != other.Province)
+                return false;
+
+            return true;
+        }
+
+        public int CompareTo(object obj)
+        {
+            Location b = (Location)obj;
+
+            var provinceCompare = string.Compare(this.Province, b.Province);
+            if (provinceCompare != 0)
+            {
+                return provinceCompare;
+            }
+
+            return string.Compare(this.CityName, b.CityName);
+        }
+
+        public int Compare(object x, object y)
+        {
+            Location l1 = (Location)x;
+            Location l2 = (Location)y;
+
+            var provinceCompare = string.Compare(l1.Province, l2.Province);
+            if (provinceCompare != 0)
+            {
+                return provinceCompare;
+            }
+
+            return string.Compare(l1.CityName, l2.CityName);
+        }
+
+        public static bool operator ==(Location x, Location y) => x.Equals(y);
+        public static bool operator !=(Location x, Location y) => !x.Equals(y);
+
+        
+
+
+
+
+
+
         public static Location Ottawa => new Location("Ottawa", ONTARIO);
         public static Location Toronto => new Location("Toronto", ONTARIO);
         public static Location Victoria => new Location("Victoria", BRITISH_COLUMBIA);
@@ -40,6 +92,10 @@ namespace LinkedOut.Domain.ValueObjects
         public static Location Remote => new Location("Remote", "");
 
         public static Location PartsUnknown => new Location("Parts Unknown", "");
+
+
+
+
 
 
         public static readonly string ALBERTA = "Alberta";

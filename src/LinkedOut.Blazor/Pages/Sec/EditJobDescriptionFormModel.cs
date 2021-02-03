@@ -12,14 +12,15 @@ namespace LinkedOut.Blazor.Pages.Sec
 
         [Required]
         [Display(Name = "job title")]
-        public string JobTitle { get; set; } = "Delivery Boy";
+        public string JobTitle { get; set; }
 
         [Required]
-        [Display(Name = "organization name")]
-        public string OrganizationName { get; set; } = "Planet Express";
+        [Display(Name = "Organization name")]
+        public string OrganizationName { get; set; }
 
         public string Description { get; set; }
 
+        [Display(Name = "Remote?")]
         public bool IsRemote { get; set; } = false;
 
         public string Source { get; set; }

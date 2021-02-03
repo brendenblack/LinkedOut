@@ -2,6 +2,7 @@
 using LinkedOut.Application.Common.Mappings;
 using LinkedOut.Domain;
 using LinkedOut.Domain.Entities;
+using LinkedOut.Domain.ValueObjects;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -28,7 +29,7 @@ namespace LinkedOut.Application.JobSearches.Queries.GetJobSearch
 
         public ApplicationResolutions Resolution { get; set; }
 
-        public string Location { get; set; }
+        public Location Location { get; set; }
     
         public bool HasContact { get; set; }
 
@@ -43,7 +44,6 @@ namespace LinkedOut.Application.JobSearches.Queries.GetJobSearch
                             .Where(tx => tx.TransitionTo == ApplicationStatuses.SUBMITTED)
                             .Select(tx => tx.Timestamp)
                             .FirstOrDefault()))
-                //.ForMember(d => d.Location, o => o.MapFrom(s => s.Location.ToString()))
                 .ForMember(d => d.HasContact, o => o.MapFrom(s => s.Notes.Any(n => !n.IsSelfAuthored)));
         }
 

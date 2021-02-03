@@ -56,6 +56,8 @@ namespace LinkedOut.Application.JobSearches.Commands
         /// </summary>
         public Formats DescriptionFormat { get; set; } = Formats.PLAINTEXT;
 
+        public bool IsRemote { get; set; }
+
         /// <summary>
         /// What city the job is centred in. 
         /// </summary>
@@ -98,7 +100,7 @@ namespace LinkedOut.Application.JobSearches.Commands
                 Source = request.Source,
                 JobDescription = request.Description,
                 JobDescriptionFormat = request.DescriptionFormat,
-                Location = new Location(request.LocationCityName, request.LocationProvince),
+                Location = (request.IsRemote) ? Location.Remote : new Location(request.LocationCityName, request.LocationProvince),
             };
 
             _context.JobApplications.Add(application);
