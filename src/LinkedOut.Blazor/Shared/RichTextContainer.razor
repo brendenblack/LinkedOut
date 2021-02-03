@@ -94,6 +94,9 @@
         _logger.LogDebug("Attempting to Initialize editor in div with id {ElementId}", _editorId);
         _editor = await _js.InvokeAsync<IJSObjectReference>("initializeRichTextEditor", $"#{_editorId}");
 
+
+        
+
         if (!string.IsNullOrWhiteSpace(Contents))
         {
             _logger.LogDebug("Populating editor {EditorId} with contents", _editorId);

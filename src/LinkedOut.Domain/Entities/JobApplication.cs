@@ -124,7 +124,22 @@ namespace LinkedOut.Domain.Entities
             ((List<StatusTransition>)Transitions).Add(creation);
 
             return Result.Ok(creation);
-        }        
+        } 
+
+        /// <summary>
+        /// Moves a submitted application to the <see cref="ApplicationStatuses.CLOSED"/> state with a resolution of <see cref="ApplicationResolutions.REJECTED"/>.
+        /// </summary>
+        /// <param name="effectiveAsOf"></param>
+        /// <returns></returns>
+        public Result<StatusTransition> Rejected(DateTime effectiveAsOf)
+        {
+            if (CurrentStatus != ApplicationStatuses.SUBMITTED)
+            {
+                return Result.Fail("Only applications that have been submitted can be marked as rejected.");
+            }
+
+            return Transition(ApplicationStatuses.CLOSED, effectiveAsOf, ApplicationResolutions.REJECTED);
+        }
 
         /// <summary>
         /// Moves this application from <see cref="ApplicationStatuses.SUBMITTED"/> to <see cref="ApplicationStatuses.INPROGRESS"/>
@@ -135,7 +150,7 @@ namespace LinkedOut.Domain.Entities
         {
             if (CurrentStatus != ApplicationStatuses.SUBMITTED)
             {
-                return Result.Fail("Only applications in the ");
+                return Result.Fail("Only applications that have been submitted can be withdrawn.");
             }
 
             return Transition(ApplicationStatuses.CLOSED, effectiveAsOf, ApplicationResolutions.WITHDRAWN);
@@ -151,6 +166,28 @@ namespace LinkedOut.Domain.Entities
             return Transition(ApplicationStatuses.INPROGRESS, effectiveAsOf);
         }
 
+        public Result<StatusTransition> Close(DateTime effectiveAsOf)
+        {
+            Result<StatusTransition> result;
+            if (CurrentStatus == ApplicationStatuses.INPROGRESS)
+            {
+                result = Transition(ApplicationStatuses.CLOSED, effectiveAsOf, ApplicationResolutions.NOT_INTERESTED);
+            }
+            else if (CurrentStatus == ApplicationStatuses.SUBMITTED)
+            {
+                result = Transition(ApplicationStatuses.CLOSED, effectiveAsOf, ApplicationResolutions.WITHDRAWN);
+            }
+            else if (CurrentStatus == ApplicationStatuses.SUBMITTED)
+            {
+                result = Transition(ApplicationStatuses.CLOSED, effectiveAsOf, ApplicationResolutions.REJECTED);
+            }
+            else
+            {
+                return Result.Fail("Cannot close the application from its current state.");
+            }
+
+            return result;
+        }
 
         /// <summary>
         /// Transition this application from one status to another.
@@ -162,12 +199,13 @@ namespace LinkedOut.Domain.Entities
         /// </remarks>
         /// <param name="transitionTo"></param>
         /// <param name="effectiveAsOf"></param>
-        /// <param name="resolution"></param>
+        /// <param name="resolution">A resolution is only respected when <paramref name="transitionTo"/> is <see cref="ApplicationStatuses.CLOSED"/>, otherwise
+        /// it will default to <see cref="ApplicationResolutions.UNRESOLVED"/>.</param>
         /// <returns></returns>
         public Result<StatusTransition> Transition(ApplicationStatuses transitionTo, DateTime effectiveAsOf, ApplicationResolutions resolution = ApplicationResolutions.UNRESOLVED)
         {
             // CAUTION: if the inner logic of this method changes, you may have to revisit the first transition created
-            // in the ctor
+            // in the ctor that somewhat duplicates this logic
 
             if (CurrentStatus == transitionTo)
             {
@@ -183,8 +221,6 @@ namespace LinkedOut.Domain.Entities
             ((List<StatusTransition>)Transitions).Add(transition);
             return Result.Ok(transition);
         }
-
-
 
         /// <summary>
         /// Adds an interview record to this job application.
@@ -213,6 +249,7 @@ namespace LinkedOut.Domain.Entities
         #endregion
 
         public bool HasOffer => Offer != null;
+
         public virtual Offer Offer { get; private set; }
 
         public Result<Offer> AddOffer(DateTime extended, string details)

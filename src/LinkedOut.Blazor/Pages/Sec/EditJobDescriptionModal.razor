@@ -29,15 +29,24 @@
           WrapperColSpan="18">
 
         <FormItem Label="Organization">
-            <Input @bind-Value="@context.OrganizationName" Placeholder="Microsoft"/>
+            <Input @bind-Value="@context.OrganizationName" Placeholder="Planet Express"/>
         </FormItem>
 
         <FormItem Label="Job title">
-            <Input @bind-Value="@context.JobTitle" Placeholder="Senior Zune Quality Analyst" />
+            <Input @bind-Value="@context.JobTitle" Placeholder="Delivery Boy" />
         </FormItem>
 
         <FormItem Label="Job description">
-            <TextArea @bind-Value="@context.Description" MinRows="8" MaxRows="8" />
+            @*<TextArea @bind-Value="@context.Description" MinRows="8" MaxRows="8" />*@
+            <RichTextInput @bind-Value="@context.Description" />
+        </FormItem>
+
+        <FormItem Label="City">
+            <Input @bind-Value="@context.City" Disabled="@context.IsRemote" Placeholder="New New York"/>
+        </FormItem>
+        
+        <FormItem Label="Province">
+            <Input @bind-Value="@context.Province" Disabled="@context.IsRemote" Placeholder="New New York" />
         </FormItem>
 
         <FormItem Label="Remote?">
@@ -65,6 +74,12 @@
 
     [Parameter]
     public int JobSearchId { get; set; }
+
+    [JSInvokable("UpdateContents")]
+    public void UpdateContent(string contents)
+    {
+
+    }
 
     public void Show()
     {
@@ -146,7 +161,7 @@
                         }
                     }
                 }
-                
+
                 _isVisible = false;
             }
             catch (Exception addOrUpdateException)

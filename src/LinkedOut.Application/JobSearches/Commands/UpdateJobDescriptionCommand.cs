@@ -89,12 +89,11 @@ namespace LinkedOut.Application.JobSearches.Commands
 
             application.OrganizationName = request.OrganizationName;
             application.JobTitle = request.JobTitle;
-            application.Source = request.Source;
+            //application.Source = request.Source;
             application.JobDescription = request.Description;
             application.JobDescriptionFormat = request.DescriptionFormat;
 
             await _context.SaveChangesAsync(cancellationToken);
-
 
             return Result.Ok();
         }

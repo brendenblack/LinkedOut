@@ -22,10 +22,12 @@ namespace LinkedOut.Application.JobSearches.Commands
 
     public enum JobApplicationAction
     {
-        SUBMIT,
-        WITHDRAW,
-        ACCEPT_OFFER,
-        REJECT_OFFER,
+        SUBMISSION,
+        REJECTION,
+        WITHDRAWAL,
+        LOSS_OF_INTEREST,
+        OFFER_ACCEPTANCE,
+        OFFER_REJECTION,
         REOPEN,
     }
 
@@ -60,18 +62,22 @@ namespace LinkedOut.Application.JobSearches.Commands
             Result<StatusTransition> transitionResult = null;
             switch (request.Action)
             {
-                case JobApplicationAction.SUBMIT:
+                case JobApplicationAction.SUBMISSION:
                     transitionResult = application.Submit(_dateTime.Now);
                     break;
-                case JobApplicationAction.WITHDRAW:
-                    transitionResult = application.Withdraw(_dateTime.Now);
+                case JobApplicationAction.LOSS_OF_INTEREST:
+                    transitionResult = application.Close(_dateTime.Now);
+                    break;
+                case JobApplicationAction.REJECTION:
+                case JobApplicationAction.WITHDRAWAL:
+                    transitionResult = application.Close(_dateTime.Now);
                     break;
                 case JobApplicationAction.REOPEN:
                     transitionResult = application.Reopen(_dateTime.Now);
                     break;
-                case JobApplicationAction.ACCEPT_OFFER:
+                case JobApplicationAction.OFFER_ACCEPTANCE:
                     throw new NotImplementedException();
-                case JobApplicationAction.REJECT_OFFER:
+                case JobApplicationAction.OFFER_REJECTION:
                     throw new NotImplementedException();
             }
 

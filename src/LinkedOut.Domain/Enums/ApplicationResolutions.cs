@@ -10,6 +10,7 @@ namespace LinkedOut
         /// The application is still in progress.
         /// </summary>
         UNRESOLVED,
+        NOT_INTERESTED,
         WITHDRAWN,
         CANCELLED,
         REJECTED,
