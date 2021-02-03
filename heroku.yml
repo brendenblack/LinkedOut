@@ -2,4 +2,4 @@ build:
   docker:
     web: Dockerfile
 run:
-  web: ASPNETCORE_URLS=$ASPNETCORE_URLS dotnet LinkedOut.Blazor.dll"
+  web: ASPNETCORE_URLS=http://*:$PORT dotnet LinkedOut.Blazor.dll"
