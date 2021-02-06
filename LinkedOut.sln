@@ -17,6 +17,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LinkedOut.Application.UnitT
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LinkedOut.Application.IntegrationTests", "test\LinkedOut.Application.IntegrationTests\LinkedOut.Application.IntegrationTests.csproj", "{B199A66F-F03B-41CA-8810-F67C25B2199D}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LinkedOut.Api.IntegrationTests", "test\LinkedOut.Api.IntegrationTests\LinkedOut.Api.IntegrationTests.csproj", "{8885C7DB-285F-4763-8616-625267F7CAD4}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LinkedOut.Api", "src\LinkedOut.Api\LinkedOut.Api.csproj", "{B6C44E24-F212-420E-884C-BF67DDCE002A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -51,6 +55,14 @@ Global
 		{B199A66F-F03B-41CA-8810-F67C25B2199D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B199A66F-F03B-41CA-8810-F67C25B2199D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B199A66F-F03B-41CA-8810-F67C25B2199D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8885C7DB-285F-4763-8616-625267F7CAD4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8885C7DB-285F-4763-8616-625267F7CAD4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8885C7DB-285F-4763-8616-625267F7CAD4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8885C7DB-285F-4763-8616-625267F7CAD4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B6C44E24-F212-420E-884C-BF67DDCE002A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B6C44E24-F212-420E-884C-BF67DDCE002A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B6C44E24-F212-420E-884C-BF67DDCE002A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B6C44E24-F212-420E-884C-BF67DDCE002A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -248,21 +248,21 @@ namespace LinkedOut.Domain.Entities
         }
         #endregion
 
-        public bool HasOffer => Offer != null;
+        //public bool HasOffer => Offer != null;
 
-        public virtual Offer Offer { get; private set; }
+        //public virtual Offer Offer { get; private set; }
 
-        public Result<Offer> AddOffer(DateTime extended, string details)
-        {
-            Offer = new Offer(this)
-            {
-                Extended = extended,
-                Expires = extended.AddDays(30),
-                Details = details,
-            };
+        //public Result<Offer> AddOffer(DateTime extended, string details)
+        //{
+        //    Offer = new Offer(this)
+        //    {
+        //        Extended = extended,
+        //        Expires = extended.AddDays(30),
+        //        Details = details,
+        //    };
 
-            return Result.Ok(Offer);
-        }
+        //    return Result.Ok(Offer);
+        //}
 
         public Result RemoveNote(int id)
         {

@@ -79,7 +79,7 @@ namespace LinkedOut.Application.IntegrationTests.JobSearches.Queries
 
             var result = await SendAsync(query);
 
-            result.Location.ShouldBe("Parts Unknown");
+            result.Location.ToString().ShouldBe("Parts Unknown");
         }
 
         [Fact]
@@ -94,7 +94,7 @@ namespace LinkedOut.Application.IntegrationTests.JobSearches.Queries
 
             var result = await SendAsync(query);
 
-            result.Location.ShouldBe(Location.Toronto.ToString());
+            result.Location.ToString().ShouldBe(Location.Toronto.ToString());
         }
 
         [Fact]
@@ -109,7 +109,7 @@ namespace LinkedOut.Application.IntegrationTests.JobSearches.Queries
 
             var result = await SendAsync(query);
 
-            result.Location.ShouldBe("New New York");
+            result.Location.ToString().ShouldBe("New New York");
         }
         #endregion
     }
