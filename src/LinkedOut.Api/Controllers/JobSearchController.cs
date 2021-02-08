@@ -14,18 +14,13 @@ using System.Threading.Tasks;
 
 namespace LinkedOut.Api.Controllers
 {
-    [Authorize]
-    [Route("/api/jobsearch")]
-    [ApiController]
-    public class JobSearchController : ControllerBase
+    public class JobSearchController : ApiController
     {
-        private readonly IMediator _mediator;
         private readonly ICurrentUserService _currentUserService;
         private readonly IDateTime _dateTime;
 
-        public JobSearchController(IMediator mediator, ICurrentUserService currentUserService, IDateTime dateTime)
+        public JobSearchController(ICurrentUserService currentUserService, IDateTime dateTime)
         {
-            _mediator = mediator;
             _currentUserService = currentUserService;
             _dateTime = dateTime;
         }
@@ -38,18 +33,18 @@ namespace LinkedOut.Api.Controllers
                 UserId = _currentUserService.UserId
             };
 
-            return await _mediator.Send(query);
+            return await Mediator.Send(query);
         }
 
         [HttpGet("{jobSearchId:int}")]
-        public async Task<JobSearchDto> GetJobSearch([FromRoute] int jobSearchId)
+        public async Task<ActionResult<JobSearchDto>> GetJobSearch([FromRoute] int jobSearchId)
         {
             var query = new GetJobSearchDetailsQuery
             {
                 JobSearchId = jobSearchId
             };
 
-            return await _mediator.Send(query);
+            return await Mediator.Send(query);
         }
 
         [HttpPost]
@@ -62,7 +57,7 @@ namespace LinkedOut.Api.Controllers
                 OwnerId = _currentUserService.UserId
             };
 
-            var result = await _mediator.Send(command);
+            var result = await Mediator.Send(command);
 
             if (result.IsSuccess)
             {

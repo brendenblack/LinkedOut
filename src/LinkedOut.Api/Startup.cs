@@ -1,23 +1,18 @@
+using FluentValidation.AspNetCore;
 using LinkedOut.Api.Services;
 using LinkedOut.Application;
 using LinkedOut.Application.Common.Interfaces;
 using LinkedOut.Infrastructure;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpOverrides;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
-using System;
-using System.Collections.Generic;
+using NSwag;
+using NSwag.Generation.Processors.Security;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace LinkedOut.Api
 {
@@ -45,67 +40,47 @@ namespace LinkedOut.Api
             services.AddLinkedOut();
             services.AddInfrastructure(Configuration);
 
-            services.AddControllers();
+            services.AddControllers()
+                .AddFluentValidation()
+                .AddNewtonsoftJson();
 
-
-
-                services.AddAuthentication("Bearer")
-                    .AddJwtBearer("Bearer", options =>
-                    {
-                        options.Authority = Configuration.GetSection("Auth").GetValue<string>("Authority");
-                        options.Audience = Configuration.GetSection("Auth").GetValue<string>("ClientId");
-                        options.TokenValidationParameters = new TokenValidationParameters
-                        {
-                            ValidateAudience = false,
-                        };
-                        options.RequireHttpsMetadata = HostingEnvironment.IsProduction();
-                    });
-
-                services.AddAuthorization(options =>
+            services.AddAuthentication("Bearer")
+                .AddJwtBearer("Bearer", options =>
                 {
-                    options.AddPolicy("ApiScope", policy =>
+                    options.Authority = Configuration.GetSection("Auth").GetValue<string>("Authority");
+                    options.Audience = Configuration.GetSection("Auth").GetValue<string>("ClientId");
+                    options.TokenValidationParameters = new TokenValidationParameters
                     {
-                        policy.RequireAuthenticatedUser();
-                        policy.RequireClaim("scope", "linkedoutapi");
-                    });
+                        ValidateAudience = false,
+                    };
+                    options.RequireHttpsMetadata = HostingEnvironment.IsProduction();
                 });
+
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy("ApiScope", policy =>
+                {
+                    policy.RequireAuthenticatedUser();
+                    policy.RequireClaim("scope", "linkedoutapi");
+                });
+            });
            
-
-            //services.AddAuthentication(options =>
-            //{
-            //    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-            //    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-            //})
-            //.AddJwtBearer(o =>
-            //{
-            //    o.RequireHttpsMetadata = HostingEnvironment.IsProduction();
-            //    o.Authority = Configuration.GetSection("Auth").GetValue<string>("Authority");
-            //    o.Audience = Configuration.GetSection("Auth").GetValue<string>("ClientId");
-            //    o.Events = new JwtBearerEvents()
-            //    {
-            //        OnAuthenticationFailed = c =>
-            //        {
-            //            c.NoResult();
-
-            //            c.Response.StatusCode = 500;
-            //            c.Response.ContentType = "text/plain";
-            //            if (HostingEnvironment.IsDevelopment())
-            //            {
-            //                return c.Response.WriteAsync(c.Exception.ToString());
-            //            }
-            //            return c.Response.WriteAsync("An error occured processing your authentication.");
-            //        }
-            //    };
-            //});
-
-            //services.AddAuthorization(options =>
-            //{
-            //    options.AddPolicy("ClientIdPolicy", policy => policy.RequireClaim("client_id", Configuration.GetSection("Auth").GetValue<string>("ClientId")));
-            //    //options.AddPolicy("Administrator", policy => policy.RequireClaim("user_roles", "[Administrator]"));
-            //});
-
             services.AddHttpContextAccessor();
+            services.AddHealthChecks();
             services.AddTransient<ICurrentUserService, HttpContextCurrentUserService>();
+
+            services.AddOpenApiDocument(configure =>
+            {
+                configure.Title = "LinkedOut API";
+                configure.AddSecurity("JWT", Enumerable.Empty<string>(), new OpenApiSecurityScheme
+                {
+                    Type = OpenApiSecuritySchemeType.ApiKey,
+                    Name = "Authorization",
+                    In = OpenApiSecurityApiKeyLocation.Header,
+                    Description = "e.g. Bearer {your JWT token}"
+                });
+                configure.OperationProcessors.Add(new AspNetCoreOperationSecurityScopeProcessor("JWT"));
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -116,7 +91,15 @@ namespace LinkedOut.Api
                 app.UseDeveloperExceptionPage();
             }
 
+            app.UseHealthChecks("/health");
+
             app.UseHttpsRedirection();
+            app.UseStaticFiles();
+            app.UseSwaggerUi3(settings =>
+            {
+                settings.Path = "/api";
+                settings.DocumentPath = "/api/specification.json";
+            });
 
             app.UseRouting();
 

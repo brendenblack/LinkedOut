@@ -21,6 +21,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LinkedOut.Api.IntegrationTe
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LinkedOut.Api", "src\LinkedOut.Api\LinkedOut.Api.csproj", "{B6C44E24-F212-420E-884C-BF67DDCE002A}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LinkedOut.BlazorWasm", "src\LinkedOut.BlazorWasm\LinkedOut.BlazorWasm.csproj", "{2DE0E5BD-1892-4FB5-9DBD-049219BE8AEF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -63,6 +65,10 @@ Global
 		{B6C44E24-F212-420E-884C-BF67DDCE002A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B6C44E24-F212-420E-884C-BF67DDCE002A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B6C44E24-F212-420E-884C-BF67DDCE002A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2DE0E5BD-1892-4FB5-9DBD-049219BE8AEF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2DE0E5BD-1892-4FB5-9DBD-049219BE8AEF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2DE0E5BD-1892-4FB5-9DBD-049219BE8AEF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2DE0E5BD-1892-4FB5-9DBD-049219BE8AEF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

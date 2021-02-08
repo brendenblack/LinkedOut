@@ -62,6 +62,8 @@ namespace LinkedOut.Infrastructure
                         b => b.MigrationsAssembly(typeof(SqlServerApplicationDbContext).Assembly.FullName)), ServiceLifetime.Transient);
 
                 services.AddScoped<IApplicationDbContext>(provider => provider.GetService<SqlServerApplicationDbContext>());
+
+                //services.AddDbContextCheck<SqlServerApplicationDbContext>();
             }
             else
             {
