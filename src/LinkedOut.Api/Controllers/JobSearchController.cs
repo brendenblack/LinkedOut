@@ -1,6 +1,9 @@
 ﻿using FluentResults;
+using LinkedOut.Api.Models;
 using LinkedOut.Application.Common.Interfaces;
 using LinkedOut.Application.JobSearches.Commands;
+using LinkedOut.Application.JobSearches.Queries.GetJobApplication;
+using LinkedOut.Application.JobSearches.Queries.GetJobOpportunity;
 using LinkedOut.Application.JobSearches.Queries.GetJobSearch;
 using LinkedOut.Application.JobSearches.Queries.GetJobSearchesForUser;
 using MediatR;
@@ -36,17 +39,6 @@ namespace LinkedOut.Api.Controllers
             return await Mediator.Send(query);
         }
 
-        [HttpGet("{jobSearchId:int}")]
-        public async Task<ActionResult<JobSearchDto>> GetJobSearch([FromRoute] int jobSearchId)
-        {
-            var query = new GetJobSearchDetailsQuery
-            {
-                JobSearchId = jobSearchId
-            };
-
-            return await Mediator.Send(query);
-        }
-
         [HttpPost]
         public async Task<ActionResult<int>> AddJobSearch([FromBody] string title)
         {
@@ -61,12 +53,83 @@ namespace LinkedOut.Api.Controllers
 
             if (result.IsSuccess)
             {
-                return Ok(result.Value);
+                return CreatedAtAction(nameof(GetJobSearch), new { jobSearchId = result.Value }, result.Value);
             }
             else
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, result.Reasons);
             }
+
+
+        }
+        
+        [HttpGet("{jobSearchId:int}")]
+        public async Task<ActionResult<JobSearchDto>> GetJobSearch([FromRoute] int jobSearchId)
+        {
+            var query = new GetJobSearchDetailsQuery
+            {
+                JobSearchId = jobSearchId
+            };
+
+            return await Mediator.Send(query);
+        }
+        
+        [HttpDelete("{jobSearchId:int}")]
+        public async Task<ActionResult> DeleteJobSearch([FromRoute] int jobSearchId)
+        {
+            var command = new DeleteJobSearchCommand { JobSearchId = jobSearchId };
+            var result = await Mediator.Send(command);
+
+            return (result.IsSuccess) 
+                ? NoContent() 
+                : HandleFailureResult(result);
+        }
+
+        [HttpPost("{jobSearchId:int}/opportunity")]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        public async Task<ActionResult<int>> AddJobOpportunity([FromRoute] int jobSearchId, [FromBody] AddJobOpportunityModel model)
+        {
+            var command = new AddJobOpportunityCommand
+            {
+                JobSearchId = jobSearchId,
+                OrganizationName = model.OrganizationName,
+                JobTitle = model.JobTitle,
+                LocationCityName = model.City,
+                LocationProvince = model.Province,
+                IsRemote = model.IsRemote,
+                Description = model.Description,
+                DescriptionFormat = Formats.HTML, // TODO
+                Source = model.Source
+            };
+
+            var result = await Mediator.Send(command);
+
+            return (result.IsSuccess) 
+                ? CreatedAtAction(nameof(GetJobOpportunity), new { jobSearchId = jobSearchId, jobOpportunityId = result.Value }, result.Value)
+                : HandleFailureResult(result);
+
+        }
+
+        [HttpGet("{jobSearchId:int}/opportunity/{jobOpportunityId:int}")]
+        public async Task<ActionResult<JobOpportunityDto>> GetJobOpportunity([FromRoute] int jobSearchId, [FromRoute] int jobOpportunityId)
+        {
+            return await Mediator.Send(new GetJobOpportunityQuery { JobOpportunityId = jobOpportunityId });
+
+        }
+
+        [HttpPut("{jobSearchId:int}/opportunity/{jobOpportunityId:int}")]
+        public async Task<ActionResult> UpdateJobDescription([FromRoute] int jobSearchId, [FromRoute] int jobOpportunityId, [FromBody] UpdateJobDescriptionModel model)
+        {
+            var command = new UpdateJobOpportunityCommand
+            {
+                JobApplicationId = jobOpportunityId,
+                Description = model.Description,
+                DescriptionFormat = model.Format,
+            };
+
+            var result = await Mediator.Send(command);
+
+            return (result.IsSuccess) ? NoContent() : HandleFailureResult(result);
         }
     }
 }

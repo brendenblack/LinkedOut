@@ -110,7 +110,7 @@
 
     private async Task handleRejectedClick()
     {
-        await handleStandardClick(JobApplicationAction.REJECTION);
+        await handleStandardClick(ApplicationActions.REJECTION);
     }
 
     private async Task handleHiredClick()
@@ -120,7 +120,7 @@
 
     private async Task handleCloseClick()
     {
-        await handleStandardClick(JobApplicationAction.WITHDRAWAL);
+        await handleStandardClick(ApplicationActions.WITHDRAWAL);
     }
 
     private async Task handleDeleteClick()
@@ -130,16 +130,16 @@
 
     private async Task handleReopenClick()
     {
-        await handleStandardClick(JobApplicationAction.REOPEN);
+        await handleStandardClick(ApplicationActions.REOPEN);
     }
 
     private async Task handleWithdrawClick()
     {
         // TODO: prompt for confirmation
-        await handleStandardClick(JobApplicationAction.WITHDRAWAL);
+        await handleStandardClick(ApplicationActions.WITHDRAWAL);
     }
 
-    private async Task handleStandardClick(JobApplicationAction action)
+    private async Task handleStandardClick(ApplicationActions action)
     {
         _loading = true;
         StateHasChanged();

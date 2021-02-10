@@ -16,3 +16,62 @@
     right: 0.75rem;
     top: 0.5rem;
 }
+
+.statistics {
+    display: none;
+}
+
+/* xs */
+@media (max-width: 576px) {
+    .container {
+        max-width: 100%;
+    }
+}
+
+@media (min-width: 577px) {
+    .container {
+        max-width: 540px;
+        width: 100%;
+        margin: auto;
+    }
+}
+
+/* md */
+@media (min-width: 768px) {
+    .container {
+        max-width: 720px;
+        width: 100%;
+        margin: auto;
+    }
+}
+
+/* lg */
+@media (min-width: 992px) {
+    .container {
+        max-width: 960px;
+        width: 100%;
+        margin: auto;
+    }
+
+    .statistics {
+        display: block;
+    }
+}
+
+/* xl */
+@media (min-width: 1200px) {
+    .container {
+        max-width: 1140px;
+        width: 100%;
+        margin: auto;
+    }
+}
+
+/* xxl */
+@media (min-width: 1400px) {
+    .container {
+        max-width: 1320px;
+        width: 100%;
+        margin: auto;
+    }
+}

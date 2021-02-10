@@ -167,7 +167,7 @@
 
     async Task handleEditJobDescriptionSave()
     {
-        var command = new UpdateJobDescriptionCommand
+        var command = new UpdateJobOpportunityCommand
         {
             JobApplicationId = JobOpportunityId,
             Description = _drawerContents,
@@ -371,7 +371,7 @@
 
     private async Task handleJobDescriptionSave(RichTextSaveResult saveResult)
     {
-        var command = new UpdateJobDescriptionCommand
+        var command = new UpdateJobOpportunityCommand
         {
             Description = saveResult.Contents,
             DescriptionFormat = saveResult.Format,

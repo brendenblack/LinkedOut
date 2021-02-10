@@ -21,7 +21,7 @@ namespace LinkedOut.Application.JobSearches.Queries.GetJobSearch
 
         public bool IsActive { get; set; }
 
-        public List<JobOpportunityDto> Applications { get; set; }
+        public List<JobSearchOpportunityDto> Applications { get; set; }
 
         public void MapFrom(Profile profile)
         {

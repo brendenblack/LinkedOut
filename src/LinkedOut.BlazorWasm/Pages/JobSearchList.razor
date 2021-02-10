@@ -1,0 +1,117 @@
+﻿@page "/jobsearch"
+
+@using LinkedOut.BlazorWasm
+
+@inject MessageService _message
+@inject JobSearchClient _client
+<div class="container">
+        <Space Direction="vertical" Style="width: 100%;">
+            <SpaceItem>
+                <Button Icon="plus" OnClick="handleCreateJobSearchClick" Type="primary">Begin a search</Button>
+            </SpaceItem>
+            <SpaceItem>
+                <Table TItem="JobSearchSummaryDto" DataSource="@_jobSearches">
+                    <Column @bind-Field="@context.Title">
+                        <a href=@($"/jobsearch/{context.Id}")>@context.Title</a>
+                    </Column>
+                    <Column @bind-Field="@context.Created" Title="Began">
+                        @context.Created.DateTime.ToShortDateString()
+                    </Column>
+                    <Column @bind-Field="@context.ApplicationsCount" Title="Opportunities"></Column>
+                </Table>
+            </SpaceItem>
+        </Space>
+
+
+        <Drawer Visible="_drawer"
+                Placement="right"
+                Width="640"
+                Title="@("Start a search")"
+                OnClose="closeDrawer">
+            <Form Model="@createJobSearchModel"
+                  OnFinish="handleCreateJobSearchSubmit"
+                  LabelColSpan="6"
+                  WrapperColSpan="18">
+                <FormItem Label="Title">
+                    <Input @bind-Value="@context.Title" Placeholder="This time it's different" />
+                </FormItem>
+
+                @*<FormItem Label="Start date">
+                        <DatePicker TValue="DateTime" Picker="@DatePickerType.Date" @bind-Value="@context.Start" />
+                    </FormItem>*@
+
+                <FormItem WrapperColOffset="6" WrapperColSpan="18">
+                    <Button Type="@ButtonType.Primary" HtmlType="submit">Save</Button>
+                </FormItem>
+            </Form>
+        </Drawer>
+</div>
+    @code {
+        bool _loading = false;
+
+        #region create job search
+        bool _drawer = false;
+        CreateJobSearchModel createJobSearchModel = new();
+        private void closeDrawer()
+        {
+            _drawer = false;
+            StateHasChanged();
+        }
+
+        public void handleCreateJobSearchClick()
+        {
+            _drawer = true;
+        }
+
+        public async Task handleCreateJobSearchSubmit()
+        {
+            await _client.AddJobSearchAsync(createJobSearchModel.Title);
+            _drawer = false;
+            RefreshJobSearches();
+        }
+        #endregion
+
+        //CreateJobSearchModal createJobSearchModal;
+
+        private List<JobSearchSummaryDto> _jobSearches = new List<JobSearchSummaryDto>();
+
+        private async Task handleJobSearchCreate(int jobSearchId)
+        {
+
+
+            _drawer = false;
+            StateHasChanged();
+            // awaiting this pauses execution until it returns, which we don't want
+            // instead, we just fire & forget
+            _message.Success($"Job search successfully created");
+            await RefreshJobSearches();
+        }
+
+        /// <summary>
+        /// Fetches the job searches associated with the current user.
+        /// </summary>
+        /// <remarks>This operaiton refreshes the state upon completion.</remarks>
+        /// <returns></returns>
+        private async Task RefreshJobSearches()
+        {
+            _loading = true;
+            StateHasChanged();
+            Console.WriteLine(_client);
+            var searches = await _client.GetJobSearchesForUserAsync();
+            Console.WriteLine(searches);
+
+            _jobSearches = searches.JobSearches.ToList();
+            //var vm = await _mediator.Send(new GetJobSearchesForUserQuery { UserId = _currentUserService.UserId });
+            //_jobSearches = vm.JobSearches;
+
+            _loading = false;
+            StateHasChanged();
+        }
+
+        protected override async Task OnInitializedAsync()
+        {
+            await RefreshJobSearches();
+
+            await base.OnInitializedAsync();
+        }
+    }

@@ -19,7 +19,7 @@ namespace LinkedOut.BlazorWasm
         protected Task<HttpRequestMessage> CreateHttpRequestMessageAsync(CancellationToken cancellationToken)
         {
             var message = new HttpRequestMessage();
-            message.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", Jwt);
+            //message.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", Jwt);
             return Task.FromResult(message);
         }
     }

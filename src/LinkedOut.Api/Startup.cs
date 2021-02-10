@@ -37,6 +37,11 @@ namespace LinkedOut.Api
                     ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedHost;
             });
 
+            services.AddCors(policy =>
+            {
+                policy.AddPolicy("PermissiveCorsPolicy", opt => opt.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod());
+            });
+
             services.AddLinkedOut();
             services.AddInfrastructure(Configuration);
 
@@ -94,6 +99,7 @@ namespace LinkedOut.Api
             app.UseHealthChecks("/health");
 
             app.UseHttpsRedirection();
+            app.UseCors("PermissiveCorsPolicy"); // TODO
             app.UseStaticFiles();
             app.UseSwaggerUi3(settings =>
             {

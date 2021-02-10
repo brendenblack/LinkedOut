@@ -17,18 +17,7 @@ namespace LinkedOut.Application.JobSearches.Commands
     {
         public int JobApplicationId { get; set; }
 
-        public JobApplicationAction Action { get; set; }
-    }
-
-    public enum JobApplicationAction
-    {
-        SUBMISSION,
-        REJECTION,
-        WITHDRAWAL,
-        LOSS_OF_INTEREST,
-        OFFER_ACCEPTANCE,
-        OFFER_REJECTION,
-        REOPEN,
+        public ApplicationActions Action { get; set; }
     }
 
     public class TransitionApplicationHandler : IRequestHandler<TransitionApplicationCommand, Result>
@@ -62,22 +51,22 @@ namespace LinkedOut.Application.JobSearches.Commands
             Result<StatusTransition> transitionResult = null;
             switch (request.Action)
             {
-                case JobApplicationAction.SUBMISSION:
+                case ApplicationActions.SUBMISSION:
                     transitionResult = application.Submit(_dateTime.Now);
                     break;
-                case JobApplicationAction.LOSS_OF_INTEREST:
+                case ApplicationActions.LOSS_OF_INTEREST:
                     transitionResult = application.Close(_dateTime.Now);
                     break;
-                case JobApplicationAction.REJECTION:
-                case JobApplicationAction.WITHDRAWAL:
+                case ApplicationActions.REJECTION:
+                case ApplicationActions.WITHDRAWAL:
                     transitionResult = application.Close(_dateTime.Now);
                     break;
-                case JobApplicationAction.REOPEN:
+                case ApplicationActions.REOPEN:
                     transitionResult = application.Reopen(_dateTime.Now);
                     break;
-                case JobApplicationAction.OFFER_ACCEPTANCE:
+                case ApplicationActions.OFFER_ACCEPTANCE:
                     throw new NotImplementedException();
-                case JobApplicationAction.OFFER_REJECTION:
+                case ApplicationActions.OFFER_REJECTION:
                     throw new NotImplementedException();
             }
 

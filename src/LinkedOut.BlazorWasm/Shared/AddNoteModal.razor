@@ -1,0 +1,125 @@
+﻿@{
+    RenderFragment footer = @<Template>
+        <Button OnClick="@handleOk" @key="@( "submit" )"
+                HtmlType="submit"
+                Type="@ButtonType.Primary"
+                Loading="@_loading">
+            <Icon Type="plus" Theme="outline" /> Add
+        </Button>
+        <Button OnClick="@handleCancel" @key="@( "back" )" Disabled="_loading">Cancel</Button>
+    </Template>;
+}
+
+<Modal Title="Add a note"
+       Visible="@_isVisible"
+       OnOk="@handleOk"
+       OnCancel="@handleCancel"
+       Footer="@footer">
+    <Form Model="@model"
+          @ref="form"
+          LabelColSpan="6"
+          WrapperColSpan="18">
+        <FormItem Label="Note contents">
+            <TextArea @bind-Value="@context.Contents" Placeholder="@_placeholder" MinRows="4" MaxRows="8" />
+        </FormItem>
+    </Form>
+</Modal>
+
+@code {
+    [Parameter]
+    public int JobApplicationId { get; set; }
+
+    [Parameter]
+    public EventCallback<int> OnNoteSave { get; set; }
+
+    bool _isVisible = false;
+    bool _loading = false;
+    Form<NoteFormModel> form;
+    NoteFormModel model = new();
+    List<string> _placeholders = new List<string>
+{
+        "This time will be different...",
+        "I have a good feeling about this one",
+        "Seventy-second time's the charm!",
+        "Note to self: remember that I told them that I am related to royalty.",
+        "This job requires 10 years of experience but I only have 5. What if I say that I have \"less than 15 years\"..."
+    };
+    string _placeholder;
+
+    private async Task handleOk(MouseEventArgs e)
+    {
+        if (form.Validate())
+        {
+            _loading = true;
+            StateHasChanged();
+
+            //var command = new AddEditNoteCommand
+            //{
+            //    JobApplicationId = JobApplicationId,
+            //    Contents = model.Contents,
+            //    NoteId = existingNoteId
+            //};
+
+            //var result = await _mediator.Send(command);
+            //if (result.IsSuccess)
+            //{
+            //    _isVisible = false;
+            //    model = new();
+
+            //    if (OnNoteSave.HasDelegate)
+            //    {
+            //        await OnNoteSave.InvokeAsync(result.Value);
+            //    }
+            //}
+            //else
+            //{
+            //    // TODO
+            //    _logger.LogWarning("Something went wrong: {@Message}", result.Reasons);
+            //}
+
+            _loading = false;
+            StateHasChanged();
+        }
+        else
+        {
+            Console.WriteLine("Invalid note form: {@FormContent}", model);
+        }
+    }
+
+    private void handleCancel(MouseEventArgs e)
+    {
+        _isVisible = false;
+        StateHasChanged();
+    }
+
+    public void Show()
+    {
+        setPlaceholder();
+        _isVisible = true;
+        StateHasChanged();
+    }
+
+    private int? existingNoteId = null;
+    private string? existingNoteContents = "";
+
+    public void SetContents(int noteId, string contents)
+    {
+        existingNoteId = noteId;
+        existingNoteContents = contents;
+        if (model == null)
+        {
+            model = new();
+        }
+
+        model.Contents = contents;
+
+        StateHasChanged();
+    }
+
+    private void setPlaceholder()
+    {
+        Random random = new Random();
+        int index = random.Next(0, _placeholders.Count);
+        _placeholder = _placeholders[index];
+    }
+}

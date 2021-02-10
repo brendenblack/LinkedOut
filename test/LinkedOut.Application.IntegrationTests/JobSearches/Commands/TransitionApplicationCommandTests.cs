@@ -25,7 +25,7 @@ namespace LinkedOut.Application.IntegrationTests.JobSearches.Commands
             var search = new JobSearch(userId);
             var application = new JobApplication(search, "", "");
             await AddAsync(application);
-            var command = new TransitionApplicationCommand { JobApplicationId = application.Id, Action = JobApplicationAction.SUBMISSION };
+            var command = new TransitionApplicationCommand { JobApplicationId = application.Id, Action = ApplicationActions.SUBMISSION };
 
             var result = await SendAsync(command);
 
@@ -49,7 +49,7 @@ namespace LinkedOut.Application.IntegrationTests.JobSearches.Commands
             var application = new JobApplication(search, "", "");
             application.Submit(DateTime.Now);
             await AddAsync(application);
-            var command = new TransitionApplicationCommand { JobApplicationId = application.Id, Action = JobApplicationAction.SUBMISSION };
+            var command = new TransitionApplicationCommand { JobApplicationId = application.Id, Action = ApplicationActions.SUBMISSION };
 
             var result = await SendAsync(command);
 
@@ -65,7 +65,7 @@ namespace LinkedOut.Application.IntegrationTests.JobSearches.Commands
             application.Submit(DateTime.Now);
             application.Withdraw(DateTime.Now);
             await AddAsync(application);
-            var command = new TransitionApplicationCommand { JobApplicationId = application.Id, Action = JobApplicationAction.SUBMISSION };
+            var command = new TransitionApplicationCommand { JobApplicationId = application.Id, Action = ApplicationActions.SUBMISSION };
 
             var result = await SendAsync(command);
 
@@ -82,7 +82,7 @@ namespace LinkedOut.Application.IntegrationTests.JobSearches.Commands
             var application = new JobApplication(search, "", "");
             application.Submit(DateTime.Now);
             await AddAsync(application);
-            var command = new TransitionApplicationCommand { JobApplicationId = application.Id, Action = JobApplicationAction.WITHDRAWAL };
+            var command = new TransitionApplicationCommand { JobApplicationId = application.Id, Action = ApplicationActions.WITHDRAWAL };
 
             var result = await SendAsync(command);
 
@@ -108,7 +108,7 @@ namespace LinkedOut.Application.IntegrationTests.JobSearches.Commands
             application.Submit(DateTime.Now);
             application.Withdraw(DateTime.Now);
             await AddAsync(application);
-            var command = new TransitionApplicationCommand { JobApplicationId = application.Id, Action = JobApplicationAction.WITHDRAWAL };
+            var command = new TransitionApplicationCommand { JobApplicationId = application.Id, Action = ApplicationActions.WITHDRAWAL };
 
             var result = await SendAsync(command);
 

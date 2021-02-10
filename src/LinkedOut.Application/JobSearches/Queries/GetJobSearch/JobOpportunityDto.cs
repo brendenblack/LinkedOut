@@ -1,17 +1,13 @@
 ﻿using AutoMapper;
 using LinkedOut.Application.Common.Mappings;
-using LinkedOut.Domain;
 using LinkedOut.Domain.Entities;
 using LinkedOut.Domain.ValueObjects;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace LinkedOut.Application.JobSearches.Queries.GetJobSearch
 {
-    public class JobOpportunityDto : IMapFrom<JobApplication>
+    public class JobSearchOpportunityDto : IMapFrom<JobApplication>
     {
         public int Id { get; set; }
 
@@ -35,7 +31,7 @@ namespace LinkedOut.Application.JobSearches.Queries.GetJobSearch
 
         public void Mapping(Profile profile)
         {
-            profile.CreateMap<JobApplication, JobOpportunityDto>()
+            profile.CreateMap<JobApplication, JobSearchOpportunityDto>()
                 .ForMember(d => d.DidApply, o => o.Ignore())
                 .ForMember(
                     d => d.AppliedOn,

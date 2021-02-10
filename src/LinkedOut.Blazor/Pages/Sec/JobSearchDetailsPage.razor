@@ -103,7 +103,7 @@
             }
             else
             {
-                <Table TItem="JobOpportunityDto" DataSource="@jobSearch.Applications">
+                <Table TItem="JobSearchOpportunityDto" DataSource="@jobSearch.Applications">
                     <Column @bind-Field="@context.JobTitle" Title="Title" Sortable>
                         <a href="/sec/jobsearch/@JobSearchId/opportunity/@context.Id">@context.JobTitle</a>
                     </Column>

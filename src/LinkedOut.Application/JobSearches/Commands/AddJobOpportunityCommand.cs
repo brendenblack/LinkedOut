@@ -1,11 +1,12 @@
 ﻿using FluentResults;
 using LinkedOut.Application.Common.Interfaces;
 using LinkedOut.Domain;
+using LinkedOut.Domain.Entities;
+using LinkedOut.Domain.ValueObjects;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -14,15 +15,15 @@ using System.Threading.Tasks;
 namespace LinkedOut.Application.JobSearches.Commands
 {
     /// <summary>
-    /// Allows the updating of details for a specific job posting.
+    /// Creates a record of a job posting that the user is considering applying for during a
+    /// specified <see cref="JobSearch"/>.
     /// </summary>
-    public class UpdateJobDescriptionCommand : IRequest<Result>
+    public class AddJobOpportunityCommand : IRequest<Result<int>>
     {
         /// <summary>
-        /// The ID of the application to update.
+        /// The <see cref="JobSearch"/> that this job opportunity is being considered for.
         /// </summary>
-        /// <remarks>Required.</remarks>
-        public int JobApplicationId { get; set; }
+        public int JobSearchId { get; set; }
 
         /// <summary>
         /// The target for the organization name. Set to the existing value to preserve it.
@@ -49,6 +50,8 @@ namespace LinkedOut.Application.JobSearches.Commands
         /// </summary>
         public Formats DescriptionFormat { get; set; } = Formats.PLAINTEXT;
 
+        public bool IsRemote { get; set; }
+
         /// <summary>
         /// What city the job is centred in. 
         /// </summary>
@@ -64,38 +67,43 @@ namespace LinkedOut.Application.JobSearches.Commands
         /// If the job is remote, this would be the home base of the position or company headquarters.
         /// </remarks>
         public string LocationProvince { get; set; }
-
-        /// <summary>
-        /// Whether the job is to be performed primarily remotely.
-        /// </summary>
-        //public bool IsRemote { get; set; } // TODO: not implemented yet
     }
 
-    public class UpdateJobDescriptionHandler : IRequestHandler<UpdateJobDescriptionCommand, Result>
+    public class AddJobOpportunityHandler : IRequestHandler<AddJobOpportunityCommand, Result<int>>
     {
-        private readonly ILogger<UpdateJobDescriptionHandler> _logger;
+        private readonly ILogger<AddJobOpportunityHandler> _logger;
         private readonly IApplicationDbContext _context;
 
-        public UpdateJobDescriptionHandler(ILogger<UpdateJobDescriptionHandler> logger, IApplicationDbContext context)
+        public AddJobOpportunityHandler(ILogger<AddJobOpportunityHandler> logger, IApplicationDbContext context)
         {
             _logger = logger;
             _context = context;
         }
 
-        public async Task<Result> Handle(UpdateJobDescriptionCommand request, CancellationToken cancellationToken)
+        public async Task<Result<int>> Handle(AddJobOpportunityCommand request, CancellationToken cancellationToken)
         {
-            var application = await _context.JobApplications
-                .FindAsync(request.JobApplicationId);
+            var parent = await _context.JobSearches.FindAsync(request.JobSearchId);
 
-            application.OrganizationName = request.OrganizationName;
-            application.JobTitle = request.JobTitle;
-            //application.Source = request.Source;
-            application.JobDescription = request.Description;
-            application.JobDescriptionFormat = request.DescriptionFormat;
+            _logger.LogDebug("Adding a job of {JobTitle} at {Organization} to job search {JobSearchId}",
+                request.JobTitle,
+                request.OrganizationName,
+                parent.Id);
+
+            JobApplication application = new JobApplication(parent, request.OrganizationName, request.JobTitle)
+            {
+                Source = request.Source,
+                JobDescription = request.Description,
+                JobDescriptionFormat = request.DescriptionFormat,
+                Location = (request.IsRemote) ? Location.Remote : new Location(request.LocationCityName, request.LocationProvince),
+            };
+
+            _context.JobApplications.Add(application);
 
             await _context.SaveChangesAsync(cancellationToken);
 
-            return Result.Ok();
+            _logger.LogDebug("Created job description: {@Application}", application);
+
+            return Result.Ok(application.Id);
         }
     }
 }
