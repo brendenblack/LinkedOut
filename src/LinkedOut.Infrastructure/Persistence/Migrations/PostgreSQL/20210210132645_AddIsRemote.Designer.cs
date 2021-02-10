@@ -3,15 +3,17 @@ using System;
 using LinkedOut.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace LinkedOut.Infrastructure.Persistence.Migrations.PostgreSQL
 {
     [DbContext(typeof(PostgreSqlApplicationDbContext))]
-    partial class PostgreSqlApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20210210132645_AddIsRemote")]
+    partial class AddIsRemote
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

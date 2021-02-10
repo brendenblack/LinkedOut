@@ -94,7 +94,8 @@ namespace LinkedOut.Application.JobSearches.Commands
                 Source = request.Source,
                 JobDescription = request.Description,
                 JobDescriptionFormat = request.DescriptionFormat,
-                Location = (request.IsRemote) ? Location.Remote : new Location(request.LocationCityName, request.LocationProvince),
+                IsRemote = request.IsRemote,
+                Location = new Location(request.LocationCityName, request.LocationProvince),
             };
 
             _context.JobApplications.Add(application);

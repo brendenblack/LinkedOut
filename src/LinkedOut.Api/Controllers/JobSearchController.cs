@@ -75,6 +75,7 @@ namespace LinkedOut.Api.Controllers
         }
         
         [HttpDelete("{jobSearchId:int}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
         public async Task<ActionResult> DeleteJobSearch([FromRoute] int jobSearchId)
         {
             var command = new DeleteJobSearchCommand { JobSearchId = jobSearchId };
@@ -114,10 +115,10 @@ namespace LinkedOut.Api.Controllers
         public async Task<ActionResult<JobOpportunityDto>> GetJobOpportunity([FromRoute] int jobSearchId, [FromRoute] int jobOpportunityId)
         {
             return await Mediator.Send(new GetJobOpportunityQuery { JobOpportunityId = jobOpportunityId });
-
         }
 
         [HttpPut("{jobSearchId:int}/opportunity/{jobOpportunityId:int}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
         public async Task<ActionResult> UpdateJobDescription([FromRoute] int jobSearchId, [FromRoute] int jobOpportunityId, [FromBody] UpdateJobDescriptionModel model)
         {
             var command = new UpdateJobOpportunityCommand

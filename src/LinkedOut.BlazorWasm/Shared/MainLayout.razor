@@ -1,6 +1,6 @@
 ﻿@inherits LayoutComponentBase
 
-<Layout Style="display: flex; flex-direction: column; height: 100%">
+<Layout Style="display: flex; flex-direction: column; min-height: 100vh">
     <Header>
         <AuthorizeView>
             <Authorized>
@@ -11,7 +11,7 @@
             </NotAuthorized>
         </AuthorizeView>
     </Header>
-    <Content Style="flex-grow: 1;">
+    <Content Style="flex-grow: 1; min-height: 100%;">
         @Body
     </Content>
     <Footer>LinkedOut</Footer>

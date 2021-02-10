@@ -1,4 +1,5 @@
-﻿@{
+﻿@inject JobApplicationClient _client 
+@{
     RenderFragment footer = @<Template>
         <Button OnClick="@handleOk" @key="@( "submit" )"
                 HtmlType="submit"
@@ -51,34 +52,18 @@
         if (form.Validate())
         {
             _loading = true;
-            StateHasChanged();
 
-            //var command = new AddEditNoteCommand
-            //{
-            //    JobApplicationId = JobApplicationId,
-            //    Contents = model.Contents,
-            //    NoteId = existingNoteId
-            //};
-
-            //var result = await _mediator.Send(command);
-            //if (result.IsSuccess)
-            //{
-            //    _isVisible = false;
-            //    model = new();
-
-            //    if (OnNoteSave.HasDelegate)
-            //    {
-            //        await OnNoteSave.InvokeAsync(result.Value);
-            //    }
-            //}
-            //else
-            //{
-            //    // TODO
-            //    _logger.LogWarning("Something went wrong: {@Message}", result.Reasons);
-            //}
+            await _client.AddNoteAsync(JobApplicationId, model.Contents);
 
             _loading = false;
-            StateHasChanged();
+            if (OnNoteSave.HasDelegate)
+            {
+                await OnNoteSave.InvokeAsync();
+            }
+            else
+            {
+                _isVisible = false;
+            }
         }
         else
         {
@@ -97,6 +82,12 @@
         setPlaceholder();
         _isVisible = true;
         StateHasChanged();
+    }
+
+    public void Hide()
+    {
+        _isVisible = false;
+        //StateHasChanged();
     }
 
     private int? existingNoteId = null;

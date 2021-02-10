@@ -29,6 +29,8 @@ namespace LinkedOut.Application.JobSearches.Queries.GetJobOpportunity
 
         public Location Location { get; set; }
 
+        public bool IsRemote { get; set; }
+
         public bool DidApply { get; set; }
 
         //public void Mapping(Profile profile)

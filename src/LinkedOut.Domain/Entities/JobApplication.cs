@@ -43,6 +43,13 @@ namespace LinkedOut.Domain.Entities
             }
         }
 
+        /// <summary>
+        /// Whether this job can be performed remotely or not.
+        /// </summary>
+        /// <remarks>The remote option does not interfere with <see cref="Location"/>, which identifies where the home office of
+        /// the position is. A job can be both remote and geographically located.</remarks>
+        public bool IsRemote { get; set; }
+
         public string OrganizationName { get; set; }
 
         public string JobTitle { get; set; }

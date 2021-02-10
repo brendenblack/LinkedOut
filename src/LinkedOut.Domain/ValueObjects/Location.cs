@@ -88,9 +88,6 @@ namespace LinkedOut.Domain.ValueObjects
         public static Location Ottawa => new Location("Ottawa", ONTARIO);
         public static Location Toronto => new Location("Toronto", ONTARIO);
         public static Location Victoria => new Location("Victoria", BRITISH_COLUMBIA);
-
-        public static Location Remote => new Location("Remote", "");
-
         public static Location PartsUnknown => new Location("Parts Unknown", "");
 
 

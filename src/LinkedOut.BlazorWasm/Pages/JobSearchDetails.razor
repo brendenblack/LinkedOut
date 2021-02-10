@@ -78,13 +78,16 @@ else
                     {
                         <Table TItem="JobSearchOpportunityDto" DataSource="@jobSearch.Applications">
                             <Column @bind-Field="@context.JobTitle" Title="Title" Sortable>
-                                <a href="/sec/jobsearch/@JobSearchId/opportunity/@context.Id">@context.JobTitle</a>
+                                <a href="/jobsearch/@JobSearchId/opportunity/@context.Id">@context.JobTitle</a>
                             </Column>
                             <Column @bind-Field="@context.OrganizationName" Title="Organization" Sortable></Column>
                             <Column @bind-Field="@context.Location" Sortable>
                                 <TitleTemplate>
                                     <span> <Icon Type="environment" /> Location </span>
                                 </TitleTemplate>
+                                <ChildContent>
+                                    <LocationLabel Location="@context.Location" IsRemote="@true" />
+                                </ChildContent>
                             </Column>
                             <Column @bind-Field="@context.Created" Sortable>@context.Created.ToString()</Column>
                             <Column @bind-Field="@context.CurrentStatus" Title="Status" Sortable>
@@ -92,9 +95,9 @@ else
                             </Column>
                             <Column @bind-Field="@context.AppliedOn" Sortable>
                                 @if (context.DidApply)
-                                        {
-                                    @context.AppliedOn.Value.ToString()
-                                        }
+                                {
+                                    @context.AppliedOn.Value.DateTime.ToShortDateString()
+                                }
                             </Column>
                         </Table>
                     }
@@ -184,9 +187,9 @@ else
 
     private async Task handleDeleteClick()
     {
-        Console.WriteLine("Delete click");
+        //Console.WriteLine("Delete click");
 
-        RenderFragment content =@<div>Are you sure you want to delete this search? This cannot be undone.</div>;
+        @*RenderFragment content =@<div>Are you sure you want to delete this search? This cannot be undone.</div>;
 
         var options = new ConfirmOptions()
         {
@@ -197,7 +200,10 @@ else
             OkType = "danger",
         };
 
-        _modalService.Confirm(options);
+        _modalService.Confirm(options);*@
+
+        // modal service confirm dialog doesn't seem to work, so... no confirmation required!
+        await deleteJobSearch();
 
         //var confirmRef = await _modalService.CreateConfirmAsync(options);
 

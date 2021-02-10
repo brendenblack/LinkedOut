@@ -87,12 +87,12 @@ namespace LinkedOut.Application.JobSearches.Commands
             var application = await _context.JobApplications
                 .FindAsync(request.JobApplicationId);
 
-            if (request.OrganizationName is not null)
+            if (!string.IsNullOrWhiteSpace(request.OrganizationName))
             {
                 application.OrganizationName = request.OrganizationName;
             }
             
-            if (application.JobTitle is not null)
+            if (!string.IsNullOrWhiteSpace(request.JobTitle))
             {
                 application.JobTitle = request.JobTitle;
             }

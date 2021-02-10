@@ -1,4 +1,4 @@
-﻿@page "/sec/jobsearch/{jobSearchId:int}/opportunity/{jobOpportunityId:int}"
+﻿@page "/jobsearch/{jobSearchId:int}/opportunity/{jobOpportunityId:int}"
 
 @inject MessageService _message
 @inject JobSearchClient _jobSearchClient
@@ -18,121 +18,163 @@ else if (_opportunity == null)
 }
 else
 {
-    <PageHeader Class="site-page-header" Title="@($"{_opportunity.JobTitle} at {_opportunity.OrganizationName}")">
-        <PageHeaderBreadcrumb>
-            <Breadcrumb Style="margin: 16px 0;">
-                <BreadcrumbItem><a href="/sec/jobsearch">Job searches</a></BreadcrumbItem>
-                @*<BreadcrumbItem><a href="/sec/jobsearch/@JobSearchId">@_opportunity.ParentSearchTitle</a></BreadcrumbItem>*@
-                <BreadcrumbItem>@_opportunity.JobTitle at @_opportunity.OrganizationName</BreadcrumbItem>
-            </Breadcrumb>
-        </PageHeaderBreadcrumb>
-        <PageHeaderSubtitle>
-           @* <StatusTag Status="@_application.CurrentStatus" />*@
-        </PageHeaderSubtitle>
-        <PageHeaderExtra>
-            <JobApplicationActions JobApplicationId="@_application.Id"
-                                    OnUpdate="handleActionUpdate" />
-        </PageHeaderExtra>
-    </PageHeader>
-    <Content>
-        @* this control is disabled because it looks awful *@
-        @*<Row Style="background-color: #ffffff;">
-                <Descriptions Bordered Column="@(new Dictionary<string, int> { { "xs", 1 }, { "lg", 3 }, { "xl", 4 } })">
-                    <DescriptionsItem Title="Location">@_opportunity.Location</DescriptionsItem>
-                    <DescriptionsItem Title="Organization">@_opportunity.OrganizationName</DescriptionsItem>
-                    <DescriptionsItem Title="Title">@_opportunity.JobTitle</DescriptionsItem>
-                </Descriptions>
-            </Row>*@
+    <div class="container">
+        <PageHeader Class="site-page-header" Title="@($"{_opportunity.JobTitle} at {_opportunity.OrganizationName}")">
+            <PageHeaderBreadcrumb>
+                <Breadcrumb Style="margin: 16px 0;">
+                    <BreadcrumbItem><a href="/jobsearch">Job searches</a></BreadcrumbItem>
+                    <BreadcrumbItem><a href="/jobsearch/@JobSearchId">@_opportunity.ParentSearchTitle</a></BreadcrumbItem>
+                    <BreadcrumbItem>@_opportunity.JobTitle at @_opportunity.OrganizationName</BreadcrumbItem>
+                </Breadcrumb>
+            </PageHeaderBreadcrumb>
 
-        <Row Gutter="2" Style="margin-top: 2px;">
-            <AntDesign.Col Xs="24" Lg="16" Xxl="@(new EmbeddedProperty() { Span="10", Offset = "4" })">
+            <PageHeaderSubtitle>
+                <Space>
+                    <SpaceItem>
+                        <LocationLabel Location="@_opportunity.Location" IsRemote="true" />
+                    </SpaceItem>
+                    @if (_application != null)
+                    {
+                        <SpaceItem>
+                            <StatusTag Status="@_application.CurrentStatus" />
+                        </SpaceItem>
+                    }
+                </Space>
+            </PageHeaderSubtitle>
+            <PageHeaderExtra>
+                @if (_application != null)
+                {
+                    <JobApplicationActions JobApplicationId="@_application.Id"
+                                           CurrentStatus="@_application.CurrentStatus"
+                                           OnUpdate="handleActionUpdate" />
+                }
+            </PageHeaderExtra>
+        </PageHeader>
+        <Content>
+            @* this control is disabled because it looks awful *@
+            @*<Row Style="background-color: #ffffff;">
+                    <Descriptions Bordered Column="@(new Dictionary<string, int> { { "xs", 1 }, { "lg", 3 }, { "xl", 4 } })">
+                        <DescriptionsItem Title="Location">@_opportunity.Location</DescriptionsItem>
+                        <DescriptionsItem Title="Organization">@_opportunity.OrganizationName</DescriptionsItem>
+                        <DescriptionsItem Title="Title">@_opportunity.JobTitle</DescriptionsItem>
+                    </Descriptions>
+                </Row>*@
+            <div style="display: flex; flex-direction: row;">
+                <div style="flex-grow: 1;">
+                    <Card Title="Job description">
+                        <Extra>
+                            <Tooltip Title="@("View the full description")">
+                                <Button Size="small"
+                                        Icon="file-search"
+                                        OnClick="handleShowDescriptionClick" />
+                            </Tooltip>
+                            <Button Size="small"
+                                    Icon="edit"
+                                    Type="primary"
+                                    Ghost
+                                    OnClick="_ => openDrawer()" />
+                        </Extra>
+                        <Body>
+                            <div style="max-height: 16em; overflow:hidden; text-overflow: ellipsis;">
+                                @((MarkupString)_opportunity.JobDescription)
+                            </div>
+                        </Body>
+                    </Card>
 
-                <Card Title="Job description">
-                    <Extra>
-                        <Button Size="small"
-                                Icon="edit"
-                                Type="primary"
-                                Ghost
-                                OnClick="_ => openDrawer()" />
-                    </Extra>
-                    <Body>
-                        <div>
-                           @* @((MarkupString)_opportunity.JobDescription)*@
-                        </div>
-                    </Body>
-                </Card>
-            </AntDesign.Col>
-            <AntDesign.Col Xs="24" Lg="8" Xl="6">
-                <!-- comment stream -->
-                <Card Title="Activity">
-                    <Extra>
-                        @*<Button Icon="caret-up" Size="small"></Button>*@
-                        <Tooltip Title="@("Add a note")">
-                            <Button Icon="flag"
-                                    Size="small"
-                                    OnClick="handleAddNoteClick" />
-                        </Tooltip>
-                        <Tooltip Title="@("Record contact from the employer")">
-                            <Button Icon="comment"
-                                    Size="small"
-                                    OnClick="handleAddEmployerContactClick" />
-                        </Tooltip>
-                    </Extra>
-                    <Body>
-                        <Space Direction="vertical" Size="middle">
-                            @foreach (var _event in _events)
+                    <Card Title="Activity">
+                        <Extra>
+                            @*<Button Icon="caret-up" Size="small"></Button>*@
+                            <Tooltip Title="@("Add a note")">
+                                <Button Icon="flag"
+                                        Size="small"
+                                        OnClick="handleAddNoteClick" />
+                            </Tooltip>
+                            <Tooltip Title="@("Record contact from the employer")">
+                                <Button Icon="comment"
+                                        Size="small"
+                                        OnClick="handleAddEmployerContactClick" />
+                            </Tooltip>
+                        </Extra>
+                        <Body>
+                            <Space Direction="vertical" Size="middle">
+                                @foreach (var _event in _events)
+                                {
+                                    <SpaceItem>
+                                        @if (_event.Type == typeof(NoteDto))
+                                        {
+                                            var note = (NoteDto)_event.Value;
+                                            if (note.Author == "self")
+                                            {
+                                                <NoteCard NoteId="@note.Id"
+                                                          Contents="@note.Contents"
+                                                          Timestamp="@note.Timestamp.DateTime"
+                                                          OnDeleteClick="handleNoteDeleteClick"
+                                                          OnEditClick="handleNoteEditClick" />
+                                            }
+                                            else
+                                            {
+                                                <ContactEventCard ContactId="@note.Id"
+                                                                  Timestamp="@note.Timestamp.DateTime"
+                                                                  Author="@note.Author"
+                                                                  Message="@note.Contents"
+                                                                  OnDeleteClick="handleNoteDeleteClick"
+                                                                  OnEditClick="handleEditEmployerContactClick" />
+                                            }
+                                        }
+                                    </SpaceItem>
+                                }
+                            </Space>
+                        </Body>
+                    </Card>
+
+                </div>
+
+
+
+                <div style="padding-top: 2em; padding-left: 2em; min-width: 240px;">
+                    <Timeline>
+                        @foreach (var _event in _events)
+                        {
+                            if (_event.Type == typeof(TransitionDto))
                             {
-                                <SpaceItem>
-                                    @if (_event.Type == typeof(NoteDto))
-                                    {
-                                        var note = (NoteDto)_event.Value;
-                                        if (note.Author == "self")
-                                        {
-                                            <NoteCard NoteId="@note.Id"
-                                                      Contents="@note.Contents"
-                                                      Timestamp="@note.Timestamp.DateTime"
-                                                      OnDeleteClick="handleNoteDeleteClick"
-                                                      OnEditClick="handleNoteEditClick" />
-                                        }
-                                        else
-                                        {
-                                            <ContactEventCard ContactId="@note.Id"
-                                                              Timestamp="@note.Timestamp.DateTime"
-                                                              Author="@note.Author"
-                                                              Message="@note.Contents"
-                                                              OnDeleteClick="handleNoteDeleteClick"
-                                                              OnEditClick="handleEditEmployerContactClick" />
-                                        }
-                                    }
-                                    else if (_event.Type == typeof(TransitionDto))
-                                    {
-                                        var transition = (TransitionDto)_event.Value;
-                                        <TransitionEventCard To="transition.TransitionTo"
-                                                             From="transition.TransitionFrom" />
-                                    }
-                                </SpaceItem>
+                                var transition = (TransitionDto)_event.Value;
+                                <TransitionTimelineItem From="@transition.TransitionFrom"
+                                                        To="@transition.TransitionTo"
+                                                        Resolution="@transition.Resolution"
+                                                        Timestamp="@transition.Timestamp.DateTime" />
                             }
-                        </Space>
-                    </Body>
-                </Card>
-            </AntDesign.Col>
-        </Row>
-    </Content>
+                        }
+                    </Timeline>
+                </div>
+            </div>
+        </Content>
+    </div>
+
+    <Drawer Closable="true"
+            Width="640"
+            Visible="_drawerVisible"
+            Placement="right"
+            Title='("Edit job description")'
+            OnClose="_ => closeDrawer()">
+        <RichTextInput @bind-Value="_opportunity.JobDescription" />
+        <Button Type="primary" OnClick="handleEditJobDescriptionSave">Save</Button>
+    </Drawer>
+
+    <Modal Visible="@_descriptionModalVisible"
+            Title="@($"{_opportunity.JobTitle} at {_opportunity.OrganizationName}")"
+            Width="640"
+            OnOk="handleDescriptionModalClose"
+            OnCancel="handleDescriptionModalClose">
+        @((MarkupString)_opportunity.JobDescription)
+    </Modal>
 }
 
-<Drawer Closable="true"
-        Width="640"
-        Visible="_drawerVisible"
-        Placement="right"
-        Title='("Edit job description")'
-        OnClose="_ => closeDrawer()">
-    <RichTextInput @bind-Value="_drawerContents" />
-    <Button Type="primary" OnClick="handleEditJobDescriptionSave">Save</Button>
-</Drawer>
+<AddNoteModal @ref="addNoteModal" 
+              JobApplicationId="@JobOpportunityId" 
+              OnNoteSave="handleNoteSave" />
 
-<AddNoteModal @ref="addNoteModal" JobApplicationId="@JobOpportunityId" OnNoteSave="handleNoteSave" />
 <EmployerContactModal @ref="employerContactModal"
-                      OnSave="handleEmployerContactSave" />
+                        OnSave="handleEmployerContactSave" />
 
 
 @code {
@@ -145,8 +187,12 @@ else
 
     protected override async Task OnParametersSetAsync()
     {
+        Console.WriteLine("Executing OnParametersSetAsync");
+        Console.WriteLine("Calling UpdateOpportunity");
         await UpdateOpportunity();
+        Console.WriteLine("Calling UpdateApplication");
         await UpdateApplication();
+        Console.WriteLine("Done");
 
         await base.OnParametersSetAsync();
     }
@@ -161,7 +207,7 @@ else
 
     #region Opportunity
     #region job description drawer
-    string _drawerContents = "";
+    bool _descriptionModalVisible = false;
     bool _drawerVisible = false;
     void openDrawer()
     {
@@ -177,17 +223,28 @@ else
     {
         var model = new UpdateJobDescriptionModel
         {
-            Description = _drawerContents,
+            Description = _opportunity.JobDescription,
             Format = Formats.HTML
         };
 
         await _jobSearchClient.UpdateJobDescriptionAsync(JobSearchId, JobOpportunityId, model);
 
         _drawerVisible = false;
+
         await UpdateOpportunity();
-        StateHasChanged();
     }
     #endregion
+
+    private void handleShowDescriptionClick()
+    {
+        _descriptionModalVisible = true;
+    }
+
+    private void handleDescriptionModalClose()
+    {
+        _descriptionModalVisible = false;
+    }
+
     #endregion
 
 
@@ -195,17 +252,8 @@ else
     #region Notes
     private async Task handleNoteDeleteClick(int noteId)
     {
-        //var command = new DeleteNoteCommand { NoteId = noteId };
-        //var result = await _mediator.Send(command);
-
-        //if (result.IsSuccess)
-        //{
-        //    await UpdateApplication();
-        //}
-        //else
-        //{
-        //    await _message.Error(string.Join("\n", result.Errors));
-        //}
+        await _jobApplicationClient.DeleteNoteAsync(JobOpportunityId, noteId);
+        await UpdateApplication();
     }
 
     private void handleNoteEditClick(int noteId)
@@ -222,9 +270,10 @@ else
         //}
     }
 
-    private async Task handleNoteSave(int noteId)
+    private async Task handleNoteSave()
     {
-        //await UpdateApplication();
+        addNoteModal.Hide();
+        await UpdateApplication();
     }
 
     AddNoteModal addNoteModal;
@@ -289,17 +338,26 @@ else
 
     private async Task UpdateOpportunity()
     {
-        var _opportunity = await _jobSearchClient.GetJobOpportunityAsync(JobSearchId, JobOpportunityId);
+        Console.WriteLine("Fetching opportunity");
+        _opportunity = await _jobSearchClient.GetJobOpportunityAsync(JobSearchId, JobOpportunityId);
 
         if (_opportunity != null)
         {
             _pageTitle = $"{_opportunity.JobTitle} at {_opportunity.OrganizationName}";
-            _drawerContents = _opportunity.JobDescription;
+            Console.WriteLine($"Returned {_pageTitle}");
         }
+        else
+        {
+            Console.WriteLine("Opportunity not found.");
+        }
+
+        StateHasChanged();
     }
 
+    bool _loadingApplication = false;
     private async Task UpdateApplication()
     {
+        _loadingApplication = true;
         var _application = await _jobApplicationClient.GetJobApplicationAsync(JobOpportunityId);
         if (_application != null)
         {
@@ -326,6 +384,9 @@ else
                 .OrderBy(c => c.Timestamp)
                 .ToList();
         }
+
+        _loadingApplication = false;
+        StateHasChanged();
     }
 
     //private async Task handleJobDescriptionSave(RichTextSaveResult saveResult)
