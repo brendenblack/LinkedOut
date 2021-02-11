@@ -132,19 +132,8 @@ else
 
 
                 <div style="padding-top: 2em; padding-left: 2em; min-width: 240px;">
-                    <Timeline>
-                        @foreach (var _event in _events)
-                        {
-                            if (_event.Type == typeof(TransitionDto))
-                            {
-                                var transition = (TransitionDto)_event.Value;
-                                <TransitionTimelineItem From="@transition.TransitionFrom"
-                                                        To="@transition.TransitionTo"
-                                                        Resolution="@transition.Resolution"
-                                                        Timestamp="@transition.Timestamp.DateTime" />
-                            }
-                        }
-                    </Timeline>
+                    <JobApplicationTimeline Events="_events" />
+
                 </div>
             </div>
         </Content>
@@ -161,20 +150,21 @@ else
     </Drawer>
 
     <Modal Visible="@_descriptionModalVisible"
-            Title="@($"{_opportunity.JobTitle} at {_opportunity.OrganizationName}")"
-            Width="640"
-            OnOk="handleDescriptionModalClose"
-            OnCancel="handleDescriptionModalClose">
+           Title="@($"{_opportunity.JobTitle} at {_opportunity.OrganizationName}")"
+           Width="640"
+           OnOk="handleDescriptionModalClose"
+           OnCancel="handleDescriptionModalClose">
         @((MarkupString)_opportunity.JobDescription)
     </Modal>
 }
 
-<AddNoteModal @ref="addNoteModal" 
-              JobApplicationId="@JobOpportunityId" 
+<AddNoteModal @ref="addNoteModal"
+              JobApplicationId="@JobOpportunityId"
               OnNoteSave="handleNoteSave" />
 
-<EmployerContactModal @ref="employerContactModal"
-                        OnSave="handleEmployerContactSave" />
+<EmployerContactModal IsVisible="_isEmployerContactModalVisible"
+                      OnSave="handleEmployerContactSave"
+                      OnCancel="handleEmployerContactCancel" />
 
 
 @code {
@@ -286,9 +276,16 @@ else
 
     #region Employer contacts
     EmployerContactModal employerContactModal;
+    bool _isEmployerContactModalVisible = false;
 
+    private void handleEmployerContactCancel()
+    {
+        _isEmployerContactModalVisible = false;
+    }
     private void handleAddEmployerContactClick()
     {
+        _isEmployerContactModalVisible = true;
+
         //var model = new EmployerContactFormModel
         //{
         //    JobApplicationId = _application.Id
@@ -321,9 +318,12 @@ else
         //employerContactModal.Show();
     }
 
-    private async Task handleEmployerContactSave(int id)
+    private async Task handleEmployerContactSave(EmployerContactModel model)
     {
-        await UpdateOpportunity();
+        await _jobApplicationClient.AddEmployerContactAsync(JobOpportunityId, model);
+        _isEmployerContactModalVisible = false;
+
+        await UpdateApplication();
     }
     #endregion
 

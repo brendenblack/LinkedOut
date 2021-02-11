@@ -1,0 +1,91 @@
+﻿@*
+    This component had to have so much render logic in it because when I was using the parent
+    to direct to more situationally appropriate components (e.g. TransitionTimelineItem and ContactTimelineItem)
+    something about the render processes made the timeline render out of order
+*@
+<div style="background-color: white; padding: 2em;">
+    <Timeline>
+        @foreach (var e in _events)
+        {
+            if (e.Type == typeof(TransitionDto))
+            {
+                var transition = (TransitionDto)e.Value;
+                if (transition.TransitionTo == ApplicationStatuses.CLOSED)
+                {
+                    if (transition.Resolution == ApplicationResolutions.REJECTED)
+                    {
+                        <ChronologicalEventTimelineItem Timestamp="@transition.Timestamp"
+                                                        Label="Rejected"
+                                                        Colour="red"
+                                                        DotIcon="close-circle" />
+                    }
+                    else if (transition.Resolution == ApplicationResolutions.WITHDRAWN)
+                    {
+                        <ChronologicalEventTimelineItem Timestamp="@transition.Timestamp"
+                                                        Label="Withdrawn"
+                                                        Colour="gray"
+                                                        DotIcon="close-circle" />
+                    }
+                    else
+                    {
+                        <ChronologicalEventTimelineItem Timestamp="@transition.Timestamp"
+                                                        Label="Closed"
+                                                        Colour="gray"
+                                                        DotIcon="close-circle" />
+                    }
+                }
+                else if (transition.TransitionTo == ApplicationStatuses.INPROGRESS)
+                {
+                    <ChronologicalEventTimelineItem Timestamp="@transition.Timestamp"
+                                                    Label="Opportunity tracked"
+                                                    Colour="gold" />
+                }
+                else if (transition.TransitionTo == ApplicationStatuses.SUBMITTED)
+                {
+
+                    <ChronologicalEventTimelineItem Timestamp="@transition.Timestamp"
+                                                    Label="Applied"
+                                                    Colour="green" />
+                }
+                else
+                {
+                    <ChronologicalEventTimelineItem Timestamp="@transition.Timestamp"
+                                                    Label="@($"{transition.TransitionFrom} to {transition.TransitionTo}")"
+                                                    Colour="red"
+                                                    DotIcon="close-circle" />
+                }
+            }
+            else if (e.Type == typeof(NoteDto))
+            {
+                if (((NoteDto)e.Value).Author != "self")
+                {
+                    <ChronologicalEventTimelineItem Timestamp="@e.Timestamp"
+                                                    Label="Contacted by employer"
+                                                    Colour="blue"
+                                                    DotIcon="comment" />
+                }
+            }
+        }
+    </Timeline>
+</div>
+
+@code {
+
+    [Parameter]
+    public List<ChronologicEvent> Events { get; set; }
+
+    private List<ChronologicEvent> _events = new();
+
+    private List<RenderFragment> _timelineEvents = new();
+
+    RenderFragment messageDotTemplate =@<Template>
+        <Icon Type="comment" Theme="outline" Style="font-size: 16px;" />
+    </Template>;
+
+protected override void OnParametersSet()
+{
+_events = Events.OrderBy(e => e.Timestamp).ToList();
+
+base.OnParametersSet();
+}
+}
