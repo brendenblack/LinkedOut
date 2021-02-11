@@ -35,8 +35,17 @@ namespace LinkedOut.Infrastructure.Persistence.Migrations.SQLServer
                     b.Property<string>("CreatedBy")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsRemote")
+                        .HasColumnType("bit");
+
                     b.Property<string>("JobDescription")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("JobDescriptionFormat")
+                        .HasColumnType("int");
 
                     b.Property<string>("JobTitle")
                         .HasColumnType("nvarchar(max)");
@@ -82,6 +91,9 @@ namespace LinkedOut.Infrastructure.Persistence.Migrations.SQLServer
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
                     b.Property<DateTime?>("LastModified")
                         .HasColumnType("datetime2");
 
@@ -121,6 +133,9 @@ namespace LinkedOut.Infrastructure.Persistence.Migrations.SQLServer
                     b.Property<string>("CreatedBy")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
                     b.Property<DateTime?>("LastModified")
                         .HasColumnType("datetime2");
 
@@ -137,55 +152,7 @@ namespace LinkedOut.Infrastructure.Persistence.Migrations.SQLServer
 
                     b.HasIndex("ApplicationId");
 
-                    b.ToTable("Note");
-                });
-
-            modelBuilder.Entity("LinkedOut.Domain.Entities.Offer", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .UseIdentityColumn();
-
-                    b.Property<int>("ApplicationId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("Created")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("CreatedBy")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Details")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("Expires")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("Extended")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("IsAccepted")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTime?>("LastModified")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("LastModifiedBy")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("Responded")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ApplicationId")
-                        .IsUnique();
-
-                    b.ToTable("Offer");
+                    b.ToTable("Notes");
                 });
 
             modelBuilder.Entity("LinkedOut.Domain.Entities.StatusTransition", b =>
@@ -262,17 +229,6 @@ namespace LinkedOut.Infrastructure.Persistence.Migrations.SQLServer
                     b.Navigation("Application");
                 });
 
-            modelBuilder.Entity("LinkedOut.Domain.Entities.Offer", b =>
-                {
-                    b.HasOne("LinkedOut.Domain.Entities.JobApplication", "Application")
-                        .WithOne("Offer")
-                        .HasForeignKey("LinkedOut.Domain.Entities.Offer", "ApplicationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Application");
-                });
-
             modelBuilder.Entity("LinkedOut.Domain.Entities.StatusTransition", b =>
                 {
                     b.HasOne("LinkedOut.Domain.Entities.JobApplication", "Application")
@@ -287,8 +243,6 @@ namespace LinkedOut.Infrastructure.Persistence.Migrations.SQLServer
             modelBuilder.Entity("LinkedOut.Domain.Entities.JobApplication", b =>
                 {
                     b.Navigation("Notes");
-
-                    b.Navigation("Offer");
 
                     b.Navigation("Transitions");
                 });

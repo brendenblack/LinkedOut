@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace LinkedOut.Domain
+namespace LinkedOut
 {
     public enum ApplicationStatuses
     {

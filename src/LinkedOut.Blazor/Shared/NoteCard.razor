@@ -1,0 +1,48 @@
+﻿@using LinkedOut.Application.JobSearches.Queries.GetJobApplication
+
+<div class="ant-comment">
+    <div class="ant-comment-inner">
+        <div class="ant-comment-avatar">
+            <Icon Type="flag" Theme="outline" />
+        </div>
+        <div class="ant-comment-content">
+            <div class="ant-comment-content-author">
+                <span class="ant-comment-content-author-time">
+                    <Tooltip Title="@($"{Note.Timestamp.ToLongDateString()} {Note.Timestamp.ToLongTimeString()}")">
+                        <span>@MomentHelper.FromNow(Note.Timestamp)</span>
+                    </Tooltip>
+                </span>
+            </div>
+            <div class="ant-comment-content-detail">
+                <p>@((MarkupString)Note.Contents)</p>
+            </div>
+            <ul class="ant-comment-actions">
+                <li>
+                    <Button Icon="edit"
+                            Size="small"
+                            Type="link"
+                            OnClick="@(() => OnEditClick.InvokeAsync(Note.Id))"
+                            Disabled="@(!OnEditClick.HasDelegate)"></Button>
+                </li>
+                <li>
+                    <Button Icon="delete"
+                            Size="small"
+                            Type="link"
+                            OnClick="@(() => OnDeleteClick.InvokeAsync(Note.Id))"
+                            Disabled="@(!OnDeleteClick.HasDelegate)" />
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public NoteDto Note { get; set; }
+
+    [Parameter]
+    public EventCallback<int> OnEditClick { get; set; }
+
+    [Parameter]
+    public EventCallback<int> OnDeleteClick { get; set; }
+}

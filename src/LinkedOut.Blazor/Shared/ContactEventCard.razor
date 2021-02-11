@@ -1,0 +1,55 @@
+﻿@using LinkedOut.Application.JobSearches.Queries.GetJobApplication
+
+<div class="ant-comment">
+    <div class="ant-comment-inner" style="padding: 0;">
+        <div class="ant-comment-avatar">
+            <Icon Type="comment" Theme="outline" />
+        </div>
+        <div class="ant-comment-content">
+            <div class="ant-comment-content-author">
+                <span class="ant-comment-content-author-name">
+                    <a>@Contact.Author</a>
+                </span>
+                <span class="ant-comment-content-author-time">
+                    <Tooltip Title="@($"{Contact.Timestamp.ToLongDateString()} {Contact.Timestamp.ToLongTimeString()}")">
+                        <span>@MomentHelper.FromNow(Contact.Timestamp)</span>
+                    </Tooltip>
+                </span>
+            </div>
+            <div class="ant-comment-content-detail">
+                <p>@Contact.Contents</p>
+            </div>
+            <ul class="ant-comment-actions">
+                <li>
+                    <Button Icon="edit" 
+                            Size="small" 
+                            Type="link" 
+                            OnClick="@(() => OnEditClick.InvokeAsync(Contact.Id))" 
+                            Disabled="@(!OnEditClick.HasDelegate)"></Button>
+                </li>
+                <li>
+                    <Popconfirm Title="Are you sure you want to delete this contact record?"
+                                OnConfirm="@(() => OnDeleteClick.InvokeAsync(Contact.Id))"
+                                OkText="Delete"
+                                CancelText="No">
+                        <Button Icon="delete"
+                                Size="small"
+                                Type="link"
+                                Disabled="@(!OnDeleteClick.HasDelegate)" />
+                    </Popconfirm>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public NoteDto Contact { get; set; }
+
+    [Parameter]
+    public EventCallback<int> OnEditClick { get; set; }
+
+    [Parameter]
+    public EventCallback<int> OnDeleteClick { get; set; }
+}

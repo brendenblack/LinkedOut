@@ -1,0 +1,81 @@
+﻿@inject IJSRuntime _js
+@inject ILogger<RichTextInput> _logger
+
+<div id="@_editorId"></div>
+
+@code {
+        [Parameter]
+        public string Value { get; set; } = "";
+
+        [Parameter]
+        public EventCallback<string> ValueChanged { get; set; }
+
+    private string _contents { get; set; }
+
+    string _editorId = $"editor_{Guid.NewGuid().ToString()}";
+    IJSObjectReference _editor;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await InitializeEditor();
+        }
+
+        await base.OnAfterRenderAsync(firstRender);
+    }
+
+    [JSInvokable("UpdateContents")]
+    public void UpdateContents(string contents)
+    {
+        _logger.LogDebug("Received contents: {Contents}", contents);
+        _contents = contents;
+        if (ValueChanged.HasDelegate)
+        {
+            ValueChanged.InvokeAsync(contents);
+        }
+    }
+
+    private async Task InitializeEditor()
+    {
+        _editor = await _js.InvokeAsync<IJSObjectReference>("initializeRichTextEditor", $"#{_editorId}");
+
+        var dotNetReference = DotNetObjectReference.Create(this);
+        var args = new object[] { _editor, dotNetReference };
+        await _js.InvokeVoidAsync("registerCallback", args);
+
+        if (!string.IsNullOrWhiteSpace(Value))
+        {
+            await _js.InvokeVoidAsync("setEditorContent", new object[] { _editor, Value });
+        }
+    }
+
+
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (_editor != null)
+        {
+            if (Value == null)
+            {
+                Value = "";
+            }
+
+            if (Value != _contents)
+            {
+
+                // if (!string.IsNullOrWhiteSpace(Contents))
+                // {
+                await _js.InvokeVoidAsync("setEditorContent", new object[] { _editor, Value });
+                // }
+            }
+        }
+
+        await base.OnParametersSetAsync();
+    }
+
+    //public async Task<string> GetContentsAsHtml()
+    //{
+    //    return await _js.InvokeAsync<string>("getEditorContentAsHtml", _editor);
+    //}
+}

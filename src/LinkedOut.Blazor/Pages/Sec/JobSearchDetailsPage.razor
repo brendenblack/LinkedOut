@@ -1,105 +1,262 @@
 ﻿@page "/sec/jobsearch/{jobSearchId:int}"
 
-@using LinkedOut.Application.Features.JobSearches.Queries.GetJobSearch
+@using System.Linq 
+@using LinkedOut.Application.JobSearches.Queries.GetJobSearch
+@using LinkedOut.Application.JobSearches.Commands
 
-@inject IMediator _mediator;
-@inject ICurrentUserService _currentUserService;
+@inject IMediator _mediator
+@inject ICurrentUserService _currentUserService
+@inject ILogger<JobSearchDetailsPage> _logger
+@inject NavigationManager _navigationManager 
+@inject ModalService _modalService 
 
-<Layout Style="height: 100%">
-    <Sider Width="200" Class="site-layout-background" Style="border-right: 1px solid lightgrey;">
-        <Menu Mode="MenuMode.Inline"
-              DefaultSelectedKeys=@(new[] {"1"})
-              DefaultOpenKeys=@(new[] {"sub1"})
-              Style="height: 100%; border-right: 0;">
-            @{
-                RenderFragment sub1Title =
-                @<span>
-                    <Icon Type="user" Theme="outline" />
-                    subnav 1
-                </span>;
+<Layout Style="height: 100%" Class="layout">
+
+    @if (_isLoading)
+    {
+        <div style="width: 100%; display: flex; justify-content: center;">
+            <Icon Type="loading" Theme="outline" />
+        </div>
+    }
+    else if (jobSearch == null)
+    {
+        <Empty>
+            It must have only been a nightmare, this search wasn't started! <a href="/sec/jobsearch">Go back</a>.
+        </Empty>
+    }
+    else
+    {
+        <PageHeader Class="site-page-header" Title="@jobSearch.Title">
+            <PageHeaderBreadcrumb>
+                <Breadcrumb Style="margin: 16px 0;">
+                    <BreadcrumbItem><a href="/sec/jobsearch">Job searches</a></BreadcrumbItem>
+                    <BreadcrumbItem><a href="/sec/jobsearch/@jobSearch.Id">@jobSearch.Title</a></BreadcrumbItem>
+                </Breadcrumb>
+            </PageHeaderBreadcrumb>
+            <PageHeaderExtra>
+                <Button Type="@ButtonType.Primary" Icon="plus" OnClick="handleAddJobPostingClick">Add job posting</Button>
+                <Dropdown Placement="@PlacementType.BottomRight">
+                    <ChildContent>
+                        <Button Icon="ellipsis" Loading="@_loading" />
+                    </ChildContent>
+                    <Overlay>
+                        <Menu>
+                            @*<MenuItem Key="1">Close</MenuItem>*@
+                            <MenuItem Key="2" OnClick="handleDeleteClick"><Icon Type="delete" /> Delete</MenuItem>
+                        </Menu>
+                    </Overlay>
+                </Dropdown>
+            </PageHeaderExtra>
+        </PageHeader>
+
+<Content Class="site-layout-background" Style=" padding: 24px; margin: 0; min-height: 280px; background-color: white;">
+    <Space Direction="vertical" Size="large" Style="width: 100%">
+        <div class="statistics">
+            <SpaceItem>
+                <Space>
+                    @foreach (var statistic in _statistics)
+                    {
+                    <SpaceItem>
+                        @*<AntDesign.Col Span="@((int)Math.Floor(24.0 / _statistics.Count))">*@
+                        <Card>
+                            <Statistic Title="@statistic.Title" Value="@statistic.Value" />
+                        </Card>
+                    </SpaceItem>
+                        @*</AntDesign.Col>*@
+                    }
+                    @*<SpaceItem>
+                            <Card>
+                                <Statistic Title="Jobs Tracked" Value="@_jobsTracked" />
+                            </Card>
+                        </SpaceItem>
+                        <SpaceItem>
+                            <Statistic Title="Jobs Applied To" Value="@_jobsAppliedTo" />
+                        </SpaceItem>
+                        <SpaceItem>
+                            <Statistic Title="Open Applications" Value="@_openApplications" />
+                        </SpaceItem>
+                        <SpaceItem>
+                            <Statistic Title="Employer Contacts" Value="@_employerContacts" />
+                        </SpaceItem>
+                        <SpaceItem>
+                            <Statistic Title="Rejections" Value="@_rejections" />
+                        </SpaceItem>
+                        <SpaceItem>
+                            <Statistic Title="Days In Progress" Value="@_daysInProgress" />
+                        </SpaceItem>*@
+                </Space>
+                <Divider Class="statistics" />
+            </SpaceItem>
+        </div>
+        <SpaceItem>
+            <Title Level="3">Opportunities</Title>
+            @if (jobSearch.Applications.Count == 0)
+            {
+                <Empty Style="width: 100%;">
+                    <DescriptionTemplate>
+                        <span>No job postings have been attached to this search.</span>
+                    </DescriptionTemplate>
+                    <ChildContent>
+                        <Button type="@ButtonType.Primary" OnClick="handleAddJobPostingClick">Add one now</Button>
+                    </ChildContent>
+                </Empty>
             }
-            <SubMenu Key="sub1" Title=sub1Title>
-                <MenuItem Key="1">option1</MenuItem>
-                <MenuItem Key="2">option2</MenuItem>
-                <MenuItem Key="3">option3</MenuItem>
-                <MenuItem Key="4">option4</MenuItem>
-            </SubMenu>
-            @{
-                RenderFragment sub2Title =
-                @<span>
-                    <Icon Type="laptop" Theme="outline" />
-                    subnav 2
-                </span>;
+            else
+            {
+                <Table TItem="JobSearchOpportunityDto" DataSource="@jobSearch.Applications">
+                    <Column @bind-Field="@context.JobTitle" Title="Title" Sortable>
+                        <a href="/sec/jobsearch/@JobSearchId/opportunity/@context.Id">@context.JobTitle</a>
+                    </Column>
+                    <Column @bind-Field="@context.OrganizationName" Title="Organization" Sortable></Column>
+                    <Column @bind-Field="@context.Location" Sortable>
+                        <TitleTemplate>
+                            <span> <Icon Type="environment" /> Location </span>
+                        </TitleTemplate>
+                    </Column>
+                    <Column @bind-Field="@context.Created" Sortable>@context.Created.ToShortDateString()</Column>
+                    <Column @bind-Field="@context.CurrentStatus" Title="Status" Sortable>
+                        <StatusTag Status="@context.CurrentStatus" />
+                    </Column>
+                    <Column @bind-Field="@context.AppliedOn" Sortable>
+                        @if (context.DidApply)
+                        {
+                            @context.AppliedOn.Value.ToShortDateString()
+                        }
+                    </Column>
+                </Table>
             }
-            <SubMenu Key="sub2" Title=sub2Title>
-                <MenuItem Key="5">option5</MenuItem>
-                <MenuItem Key="6">option6</MenuItem>
-                <MenuItem Key="7">option7</MenuItem>
-                <MenuItem Key="8">option8</MenuItem>
-            </SubMenu>
-            @{
-                RenderFragment sub3Title =
-                @<span>
-                    <Icon Type="notification" Theme="outline" />
-                    subnav 3
-                </span>;
-            }
-            <SubMenu Key="sub3" Title=sub3Title>
-                <MenuItem Key="9">option9</MenuItem>
-                <MenuItem Key="10">option10</MenuItem>
-                <MenuItem Key="11">option11</MenuItem>
-                <MenuItem Key="12">option12</MenuItem>
-            </SubMenu>
-        </Menu>
-    </Sider>
-    <Layout>
+        </SpaceItem>
+    </Space>
 
-        @if (_isLoading)
-        {
-            <div style="width: 100%; display: flex; justify-content: center;">
-                <Icon Type="loading" Theme="outline" />
-            </div>
-        }
-        else if (jobSearch == null)
-        {
 
-        }
-        else
-        {
-            <PageHeader Class="site-page-header" Title="@jobSearch.Title">
-                <PageHeaderBreadcrumb>
-                    <Breadcrumb Style="margin: 16px 0;">
-                        <BreadcrumbItem><a href="/sec/jobsearch">Job searches</a></BreadcrumbItem>
-                        <BreadcrumbItem><a href="/sec/jobsearch/@jobSearch.Id">@jobSearch.Title</a></BreadcrumbItem>
-                    </Breadcrumb>
-                </PageHeaderBreadcrumb>
-            </PageHeader>
+</Content>
 
-            <Content Class="site-layout-background" Style=" padding: 24px; margin: 0; min-height: 280px;">
-
-            </Content>
-
-        }
-    </Layout>
+}
 </Layout>
+
+
+<EditJobDescriptionModal
+@ref="editJobDescriptionModal"
+JobSearchId="JobSearchId"
+OnCreate="handleJobApplicationCreate" />
+
 
 @code {
     [Parameter]
     public int JobSearchId { get; set; }
 
     JobSearchDto jobSearch;
+    bool _loading = false;
+    List<StatisticEntry> _statistics = new();
 
     bool _isLoading = false;
 
+    private EditJobDescriptionModal editJobDescriptionModal;
+    private void handleAddJobPostingClick()
+    {
+        editJobDescriptionModal.Show();
+    }
+
+    private async Task handleJobApplicationCreate(int createdId)
+    {
+        await UpdateJobSearch();
+    }
+
+    private async Task handleDeleteClick()
+    {
+
+        _modalService.Confirm(new ConfirmOptions()
+        {
+            Title = "Confirmation required",
+            Icon = @<Icon Type="exclamation-circle" Theme="outline"></Icon>,
+            Content = "Are you sure you want to delete this search? This cannot be undone.",
+            OnOk = (e) => { return deleteJobSearch(); },
+            OkType = "danger",
+        });
+
+    }
+
+    private async Task deleteJobSearch()
+    {
+        _loading = true;
+        StateHasChanged();
+
+        var command = new DeleteJobSearchCommand { JobSearchId = JobSearchId };
+        var result = await _mediator.Send(command);
+
+        _loading = false;
+        StateHasChanged();
+
+        if (result.IsSuccess)
+        {
+            _navigationManager.NavigateTo("/sec/jobsearch", true);
+        }
+    }
+
+
+    private void OnPanelChange(DateTime value, string mode)
+    {
+        //_logger.LogDebug("{Date} with a mode of {Mode}",
+        //    value?.ToString("yyyy-MM-dd") ?? "undefined",
+        //    mode);
+    }
+
+
     protected override async Task OnParametersSetAsync()
+    {
+        await UpdateJobSearch();
+
+        await base.OnParametersSetAsync();
+    }
+
+    private async Task UpdateJobSearch()
     {
         _isLoading = true;
         StateHasChanged();
 
         jobSearch = await _mediator.Send(new GetJobSearchDetailsQuery { JobSearchId = JobSearchId });
 
-        _isLoading = false;
+        _statistics.Clear();
 
-        await base.OnParametersSetAsync();
+        if (jobSearch != null)
+        {
+
+            var daysInProgress = (int)(DateTime.Now - jobSearch.Created).TotalDays;
+            _statistics.Add(new StatisticEntry { Title = "Days In Progress", Value = daysInProgress });
+
+            var jobsTracked = jobSearch.Applications.Count;
+            _statistics.Add(new StatisticEntry { Title = "Opportunities", Value = jobsTracked });
+
+            var jobsAppliedTo = jobSearch.Applications
+                .Where(a => a.CurrentStatus >= ApplicationStatuses.SUBMITTED)
+                .Count();
+            _statistics.Add(new StatisticEntry { Title = "Total Applications", Value = jobsAppliedTo });
+
+            var openApplications = jobSearch.Applications
+                .Where(a => a.CurrentStatus >= ApplicationStatuses.SUBMITTED)
+                .Where(a => a.CurrentStatus != ApplicationStatuses.CLOSED)
+                .Count();
+            _statistics.Add(new StatisticEntry { Title = "Open Applications", Value = openApplications });
+
+            var employerContacts = jobSearch.Applications
+                .Where(n => n.HasContact)
+                .Count();
+            _statistics.Add(new StatisticEntry { Title = "Employer Contacts", Value = employerContacts });
+
+            var rejections = jobSearch.Applications
+                .Where(a => a.Resolution == ApplicationResolutions.REJECTED)
+                .Count();
+            _statistics.Add(new StatisticEntry { Title = "Rejections", Value = rejections });
+        }
+
+        _isLoading = false;
+        StateHasChanged();
+    }
+
+    public class StatisticEntry
+    {
+        public string Title { get; set; }
+
+        public int Value { get; set; }
     }
 }

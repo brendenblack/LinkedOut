@@ -12,57 +12,59 @@ using System.Threading.Tasks;
 
 namespace LinkedOut.Infrastructure.Persistence
 {
-    public class MyDbContext : ApplicationDbContext
-    {
-        public MyDbContext(DbContextOptions<MyDbContext> options) : base(options, null, null) { }
-    }
+    //[Obsolete]
+    //public class MyDbContext : ApplicationDbContext
+    //{
+    //    public MyDbContext(DbContextOptions<MyDbContext> options) : base(options, null, null) { }
+    //}
 
-    public abstract class ApplicationDbContext : DbContext, IApplicationDbContext
-    {
-        private readonly ICurrentUserService _currentUserService;
-        private readonly IDateTime _dateTime;
+    //[Obsolete]
+    //public abstract class ApplicationDbContext : DbContext, IApplicationDbContext
+    //{
+    //    private readonly ICurrentUserService _currentUserService;
+    //    private readonly IDateTime _dateTime;
 
-        public ApplicationDbContext(
-            DbContextOptions options,
-            ICurrentUserService currentUserService,
-            IDateTime dateTime) : base(options)
-        {
-            _currentUserService = currentUserService;
-            _dateTime = dateTime;
-        }
+    //    public ApplicationDbContext(
+    //        DbContextOptions options,
+    //        ICurrentUserService currentUserService,
+    //        IDateTime dateTime) : base(options)
+    //    {
+    //        _currentUserService = currentUserService;
+    //        _dateTime = dateTime;
+    //    }
 
-        public DbSet<JobApplication> JobApplications { get; set; }
+    //    public DbSet<JobApplication> JobApplications { get; set; }
 
-        public DbSet<JobSearch> JobSearches { get; set; }
+    //    public DbSet<JobSearch> JobSearches { get; set; }
 
-        public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = new CancellationToken())
-        {
-            foreach (Microsoft.EntityFrameworkCore.ChangeTracking.EntityEntry<AuditableEntity> entry in ChangeTracker.Entries<AuditableEntity>())
-            {
-                switch (entry.State)
-                {
-                    case EntityState.Added:
-                        entry.Entity.CreatedBy = _currentUserService.UserId;
-                        entry.Entity.Created = _dateTime.Now;
-                        break;
+    //    public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = new CancellationToken())
+    //    {
+    //        foreach (Microsoft.EntityFrameworkCore.ChangeTracking.EntityEntry<AuditableEntity> entry in ChangeTracker.Entries<AuditableEntity>())
+    //        {
+    //            switch (entry.State)
+    //            {
+    //                case EntityState.Added:
+    //                    entry.Entity.CreatedBy = _currentUserService.UserId;
+    //                    entry.Entity.Created = _dateTime.Now;
+    //                    break;
 
-                    case EntityState.Modified:
-                        entry.Entity.LastModifiedBy = _currentUserService.UserId;
-                        entry.Entity.LastModified = _dateTime.Now;
-                        break;
-                }
-            }
+    //                case EntityState.Modified:
+    //                    entry.Entity.LastModifiedBy = _currentUserService.UserId;
+    //                    entry.Entity.LastModified = _dateTime.Now;
+    //                    break;
+    //            }
+    //        }
 
-            var result = await base.SaveChangesAsync(cancellationToken);
+    //        var result = await base.SaveChangesAsync(cancellationToken);
 
-            return result;
-        }
+    //        return result;
+    //    }
 
-        protected override void OnModelCreating(ModelBuilder builder)
-        {
-            builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
+    //    protected override void OnModelCreating(ModelBuilder builder)
+    //    {
+    //        builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
 
-            base.OnModelCreating(builder);
-        }
-    }
+    //        base.OnModelCreating(builder);
+    //    }
+    //}
 }

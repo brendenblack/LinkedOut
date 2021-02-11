@@ -1,0 +1,45 @@
+﻿
+@if (dotTemplate != null)
+{
+    <TimelineItem Color="@Colour" Dot="@dotTemplate">
+        <span>@Label</span>
+        <br />
+        <span>@Timestamp.ToString("yyyy-MM-dd hh:mm:ss tt")</span>
+    </TimelineItem>
+}
+else
+{
+    <TimelineItem Color="@Colour">
+        <span>@Label</span>
+        <br />
+        <span>@Timestamp.ToString("yyyy-MM-dd hh:mm:ss tt")</span>
+    </TimelineItem>
+}
+
+@code {
+    [Parameter]
+    public DateTimeOffset Timestamp { get; set; }
+
+    [Parameter]
+    public string Label { get; set; }
+
+    [Parameter]
+    public string Colour { get; set; }
+
+    [Parameter]
+    public string? DotIcon { get; set; }
+
+    RenderFragment dotTemplate = null;
+
+    protected override void OnParametersSet()
+    {
+        @if (!string.IsNullOrWhiteSpace(DotIcon))
+        {
+            dotTemplate =@<Template>
+                <Icon Type="@DotIcon" Theme="outline" Style="font-size: 16px;" />
+            </Template>;
+        }
+
+        base.OnParametersSet();
+    }
+}

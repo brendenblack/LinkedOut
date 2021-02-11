@@ -1,0 +1,42 @@
+﻿.text-placeholder {
+    color: rgba(0, 0, 0, 0.5);
+}
+
+.hidden {
+    display: none;
+}
+
+.viewmode {
+    
+    position: relative;
+    min-height: 4em;
+    padding-right: 40px;
+}
+
+/* this selector requires deep because the button is only conditionally rendered */
+::deep .edit-btn {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+}
+
+section {
+    width: 100%;
+    height: 100%;
+}
+
+/* this selector requires deep because the button is only conditionally rendered */
+::deep .button-row {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    grid-gap: 16px;
+    padding-top: 16px;
+}
+
+.editor-container {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    min-height: 200px;
+}

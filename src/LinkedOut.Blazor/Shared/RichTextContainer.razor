@@ -1,0 +1,155 @@
+﻿@inject IJSRuntime _js
+@inject ILogger<RichTextContainer> _logger
+<section style="max-width: 100vw; width: 100%; min-height: 300px;">
+    <div class="@((_isEdit) ? "editor-container" : "hidden")">
+        <div id="@_editorId" class=""></div>
+    </div>
+    @if (_isEdit)
+    {
+        <div class="button-row">
+            <Button Type="primary" OnClick="handleSaveClick">Save</Button>
+            <Button OnClick="handleCancelClick">Cancel</Button>
+        </div>
+    }
+    else
+    {
+        <div class="viewmode @((_isEdit) ? "hidden" : "")">
+            @if (!ReadOnly)
+            {
+                // only show the toggle edit button if this isn't read only
+                <Button Size="small" Icon="edit" Type="primary" Class="edit-btn" OnClick="handleEditClick" Ghost></Button>
+            }
+            @if (string.IsNullOrWhiteSpace(Contents))
+            {
+                <p class="text-placeholder">@Placeholder</p>
+            }
+            else if (Format == Formats.MARKDOWN)
+            {
+                @("Markdown content is not supported")
+            }
+            else if (Format == Formats.HTML)
+            {
+                @((MarkupString)Contents)
+            }
+            else
+            {
+                @Contents
+            }
+        </div>
+    }
+</section>
+
+
+@code {
+
+    /// <summary>
+    /// The contents to display.
+    /// </summary>
+    /// <remarks>This value is immutable; if it is edited, a new value will be returned by <see cref="OnSave"/></remarks>
+    [Parameter]
+    public string Contents { get; set; }
+
+    /// <summary>
+    /// Whether this field is 
+    /// </summary>
+    [Parameter]
+    public bool ReadOnly { get; set; } = false;
+
+    [Parameter]
+    public Formats Format { get; set; } = Formats.HTML;
+
+    [Parameter]
+    public EventCallback<RichTextSaveResult> OnSave { get; set; }
+
+    [Parameter]
+    public string Placeholder { get; set; } = "This is a placeholder";
+
+
+    /// <summary>
+    /// The component's id is generated, to allow for multiple instances of this component on a single page.
+    /// </summary>
+    string _editorId;
+
+    bool _isEdit = false;
+
+    IJSObjectReference _editor;
+
+    protected override void OnParametersSet()
+    {
+        if (string.IsNullOrWhiteSpace(_editorId))
+        {
+            _editorId = $"editor_{Guid.NewGuid().ToString()}";
+        }
+
+        base.OnParametersSet();
+    }
+
+    private async Task InitializeEditor()
+    {
+        //if (string.IsNullOrWhiteSpace(_editorRef.Id))
+        //{
+        //    _logger.LogWarning("Editor ref ID is empty, but generated id is {ElementId}", _editorId);
+        //}
+
+        _logger.LogDebug("Attempting to Initialize editor in div with id {ElementId}", _editorId);
+        _editor = await _js.InvokeAsync<IJSObjectReference>("initializeRichTextEditor", $"#{_editorId}");
+
+
+        
+
+        if (!string.IsNullOrWhiteSpace(Contents))
+        {
+            _logger.LogDebug("Populating editor {EditorId} with contents", _editorId);
+            await _js.InvokeVoidAsync("setEditorContent", new object[] { _editor, Contents });
+        }
+        else
+        {
+            _logger.LogDebug("No content to populate editor {EditorId}", _editorId);
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && _isEdit)
+        {
+            await InitializeEditor();
+        }
+
+        await base.OnAfterRenderAsync(firstRender);
+    }
+
+    private async Task handleEditClick()
+    {
+        _isEdit = true;
+        StateHasChanged();
+
+        if (_editor == null)
+        {
+            await InitializeEditor();
+        }
+    }
+
+    private async Task handleSaveClick()
+    {
+        var contents = await _js.InvokeAsync<string>("getEditorContentAsHtml", _editor);
+        _logger.LogDebug("Saving contents in editor {editorId}", _editorId);
+
+        // we set our own contents here, but expect to be rerendered with new contents after
+        // firing the OnSave event
+        Contents = contents;
+        Format = Formats.HTML;
+        _isEdit = false;
+        StateHasChanged();
+
+        if (OnSave.HasDelegate)
+        {
+            await OnSave.InvokeAsync(new RichTextSaveResult { Contents = contents, Format = Formats.HTML });
+        }
+    }
+
+    private void handleCancelClick()
+    {
+        _isEdit = false;
+        StateHasChanged();
+    }
+}

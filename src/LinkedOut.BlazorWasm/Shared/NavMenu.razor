@@ -1,0 +1,49 @@
+﻿@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+
+@inject NavigationManager Navigation
+@inject SignOutSessionStateManager SignOutManager
+
+<div style="display: flex; flex-direction: row; z-index:1; width: 100%;">
+    <div class="logo">
+        <a href="/">LinkedOut</a>
+    </div>
+    <Menu Mode="MenuMode.Horizontal" Theme="MenuTheme.Dark">
+        <MenuItem Key="mysearches" RouterLink="/jobsearch" RouterMatch="NavLinkMatch.Prefix">
+            My searches
+        </MenuItem>
+        <!--<SubMenu Title="Job searches">
+            <MenuItem Key="mysearches" RouterLink="/sec/jobsearch" RouterMatch="NavLinkMatch.Prefix"><MenuLink href="/sec/jobsearch">My searches</MenuLink></MenuItem>
+            <MenuItemGroup Title="Recent searches">-->
+        @*<MenuItem Key="search1">Job Search 2020</MenuItem>*@
+        <!--</MenuItemGroup>
+        </SubMenu>-->
+    </Menu>
+    <span style="flex-grow: 1;"></span>
+    <Menu Theme="MenuTheme.Dark" Mode="MenuMode.Horizontal">
+        @*<SubMenu TitleTemplate="@userSubmenuTitle">
+            <MenuItem Key="settings"><MenuLink Href="/user">Settings</MenuLink></MenuItem>
+            <Divider />
+            <MenuItem Key="logout"><MenuLink Href="/logout">Sign out</MenuLink></MenuItem>
+        </SubMenu>*@
+        <MenuItem Key="logout" OnClick="BeginSignOut">Log out</MenuItem>
+    </Menu>
+</div>
+
+
+@code {
+    private bool collapseNavMenu = true;
+
+    private string NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+
+    private void ToggleNavMenu()
+    {
+        collapseNavMenu = !collapseNavMenu;
+    }
+
+    private async Task BeginSignOut(MouseEventArgs args)
+    {
+        await SignOutManager.SetSignOutState();
+        Navigation.NavigateTo("authentication/logout");
+    }
+}

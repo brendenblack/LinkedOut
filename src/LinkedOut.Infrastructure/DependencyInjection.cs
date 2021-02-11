@@ -62,6 +62,8 @@ namespace LinkedOut.Infrastructure
                         b => b.MigrationsAssembly(typeof(SqlServerApplicationDbContext).Assembly.FullName)), ServiceLifetime.Transient);
 
                 services.AddScoped<IApplicationDbContext>(provider => provider.GetService<SqlServerApplicationDbContext>());
+
+                //services.AddDbContextCheck<SqlServerApplicationDbContext>();
             }
             else
             {
@@ -71,13 +73,12 @@ namespace LinkedOut.Infrastructure
                 services.AddScoped<IApplicationDbContext>(provider => provider.GetService<SqlServerApplicationDbContext>());
             }
 
-
+            services.AddTransient<INewUserService, FuturamaNewUserService>();
             services.AddTransient<IDateTime, DateTimeService>();
 
             return services;
         }
 
-        
         public static bool TryGetHerokuConnectionString(out string connectionString)
         {
             var environmentConnectionString = Environment.GetEnvironmentVariable("DATABASE_URL");

@@ -36,6 +36,8 @@ namespace LinkedOut.Infrastructure.Persistence
 
         public DbSet<JobSearch> JobSearches { get; set; }
 
+        public DbSet<Note> Notes { get; set; }
+
         public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = new CancellationToken())
         {
             foreach (Microsoft.EntityFrameworkCore.ChangeTracking.EntityEntry<AuditableEntity> entry in ChangeTracker.Entries<AuditableEntity>())
@@ -50,6 +52,14 @@ namespace LinkedOut.Infrastructure.Persistence
                     case EntityState.Modified:
                         entry.Entity.LastModifiedBy = _currentUserService.UserId;
                         entry.Entity.LastModified = _dateTime.Now;
+                        break;
+                    // prevent physical deletion of AuditableEntities, but still allow the use of Remove and RemoveRange
+                    // here, we first set the state to be unchanged, and then modify the IsDeleted field before allowing the save
+                    // https://www.ryansouthgate.com/2019/01/07/entity-framework-core-soft-delete/
+                    // https://docs.microsoft.com/en-us/ef/core/querying/filters#disabling-filters
+                    case EntityState.Deleted:
+                        entry.State = EntityState.Unchanged;
+                        entry.Entity.IsDeleted = true;
                         break;
                 }
             }

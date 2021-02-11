@@ -1,4 +1,8 @@
-﻿/* xs */
+﻿.statistics {
+    display: none;
+}
+
+/* xs */
 @media (max-width: 576px) {
     .container {
         max-width: 100%;
@@ -28,6 +32,10 @@
         max-width: 960px;
         width: 100%;
         margin: auto;
+    }
+
+    .statistics {
+        display: block;
     }
 }
 

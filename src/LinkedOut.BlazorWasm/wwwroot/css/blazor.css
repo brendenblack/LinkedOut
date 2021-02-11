@@ -1,0 +1,77 @@
+﻿#blazor-error-ui {
+    background: lightyellow;
+    bottom: 0;
+    box-shadow: 0 -1px 2px rgba(0, 0, 0, 0.2);
+    display: none;
+    left: 0;
+    padding: 0.6rem 1.25rem 0.7rem 1.25rem;
+    position: fixed;
+    width: 100%;
+    z-index: 1000;
+}
+
+#blazor-error-ui .dismiss {
+    cursor: pointer;
+    position: absolute;
+    right: 0.75rem;
+    top: 0.5rem;
+}
+
+.statistics {
+    display: none;
+}
+
+/* xs */
+@media (max-width: 576px) {
+    .container {
+        max-width: 100%;
+    }
+}
+
+@media (min-width: 577px) {
+    .container {
+        max-width: 540px;
+        width: 100%;
+        margin: auto;
+    }
+}
+
+/* md */
+@media (min-width: 768px) {
+    .container {
+        max-width: 720px;
+        width: 100%;
+        margin: auto;
+    }
+}
+
+/* lg */
+@media (min-width: 992px) {
+    .container {
+        max-width: 960px;
+        width: 100%;
+        margin: auto;
+    }
+
+    .statistics {
+        display: block;
+    }
+}
+
+/* xl */
+@media (min-width: 1200px) {
+    .container {
+        max-width: 1140px;
+        width: 100%;
+        margin: auto;
+    }
+}
+
+/* xxl */
+@media (min-width: 1400px) {
+    .container {
+        max-width: 1320px;
+        width: 100%;
+        margin: auto;
+    }
+}

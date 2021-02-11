@@ -1,0 +1,117 @@
+﻿@page "/sec/jobsearch/{jobSearchId:int}/opportunity/{opportunityId:int}/apply"
+
+@using LinkedOut.Application.JobSearches.Queries.GetJobOpportunity
+@using LinkedOut.Application.JobSearches.Commands
+
+@inject IMediator _mediator
+@inject IJSRuntime _js
+
+<Layout>
+    <Row>
+        @if (_opportunity != null && !_opportunity.DidApply)
+        {
+            <Button Style="primary" Icon="save">Submit</Button>
+        }
+        else
+        {
+            <Button Style="primary" Icon="save">Update</Button>
+        }
+
+    </Row>
+    <Row Style="background-color: #ffffff;">
+        <AntDesign.Col Xs="24" Xl="8">
+            <Card Title="Resumé">
+                <div id="resume-editor"></div>
+            </Card>
+        </AntDesign.Col>
+        <AntDesign.Col Xs="24" Xl="8">
+            <Card Title="Cover Letter">
+                <div id="coverletter-editor"></div>
+            </Card>
+        </AntDesign.Col>
+        <AntDesign.Col Xs="24" Xl="8">
+            <Card Title="@((_opportunity == null) ? "Job description" : $"{_opportunity.JobTitle} description")" Loading="@_isFetchingDescription">
+                @if (_opportunity != null)
+                {
+                    @((MarkupString)_opportunity.JobDescription)
+                }
+            </Card>
+        </AntDesign.Col>
+    </Row>
+</Layout>
+
+@code {
+    [Parameter]
+    public int JobSearchId { get; set; }
+
+    [Parameter]
+    public int OpportunityId { get; set; }
+
+    JobOpportunityDto _opportunity;
+
+    bool _isFetchingDescription = false;
+
+    bool _loading = false;
+
+    string _pageTitle = "";
+
+    bool _isSubmitted = false;
+
+    string _contents;
+
+    IJSObjectReference resumeEditor;
+    IJSObjectReference coverLetterEditor;
+
+    private async Task handleApplyClick()
+    {
+        _loading = true;
+        StateHasChanged();
+
+        var contents = await _js.InvokeAsync<string>("getEditorContentAsHtml", resumeEditor);
+        var command = new SubmitApplicationCommand
+        {
+            JobApplicationId = OpportunityId,
+            ResumeFormat = Formats.HTML,
+            ResumeContents = contents
+        };
+
+        var result = await _mediator.Send(command);
+
+        await Update();
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await Update();
+        await base.OnParametersSetAsync();
+    }
+
+    private async Task Update()
+    {
+        if (!_isFetchingDescription)
+        {
+            _isFetchingDescription = true;
+            StateHasChanged();
+        }
+
+        var query = new GetJobOpportunityQuery { JobOpportunityId = OpportunityId };
+
+        _opportunity = await _mediator.Send(query);
+
+        _isFetchingDescription = false;
+        StateHasChanged();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            resumeEditor = await _js.InvokeAsync< IJSObjectReference>("initializeRichTextEditor", "#resume-editor");
+            //coverLetterEditor = await _js.InvokeAsync< IJSObjectReference>("initializeRichTextEditor", "#coverletter-editor");
+        }
+
+        await base.OnAfterRenderAsync(firstRender);
+    }
+
+
+}

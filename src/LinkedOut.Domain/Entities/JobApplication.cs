@@ -30,7 +30,25 @@ namespace LinkedOut.Domain.Entities
 
         public virtual JobSearch ParentSearch { get; private set; }
 
-        public Location Location { get; set; }
+        private Location _location;
+        public Location Location
+        {
+            get
+            {
+                return _location ??  Location.PartsUnknown;
+            }
+            set
+            {
+                _location = value;
+            }
+        }
+
+        /// <summary>
+        /// Whether this job can be performed remotely or not.
+        /// </summary>
+        /// <remarks>The remote option does not interfere with <see cref="Location"/>, which identifies where the home office of
+        /// the position is. A job can be both remote and geographically located.</remarks>
+        public bool IsRemote { get; set; }
 
         public string OrganizationName { get; set; }
 
@@ -47,7 +65,7 @@ namespace LinkedOut.Domain.Entities
         /// </summary>
         public string JobDescription { get; set; }
 
-        public Formats JobDescriptionFormat = Formats.PLAINTEXT;
+        public Formats JobDescriptionFormat { get; set; } = Formats.PLAINTEXT;
 
         /// <summary>
         /// Where this job opportunity was discovered.
@@ -84,26 +102,121 @@ namespace LinkedOut.Domain.Entities
 
         public virtual IReadOnlyCollection<StatusTransition> Transitions { get; } = new List<StatusTransition>();
 
+        public bool CanSubmit => CurrentStatus == ApplicationStatuses.INPROGRESS;
+
+        public bool DidApply => Transitions.Any(t => t.TransitionTo == ApplicationStatuses.SUBMITTED);
+
+        public Result<StatusTransition> Submit(DateTime effectiveAsOf, string resume, Formats resumeFormat)
+        {
+            var transitionResult = Submit(effectiveAsOf);
+            if (transitionResult.IsFailed)
+            {
+                return transitionResult;
+            }
+
+            Resume = resume;
+            ResumeFormat = resumeFormat;
+
+            return Result.Ok(transitionResult.Value);
+        }
+
+        public Result<StatusTransition> Submit(DateTime effectiveAsOf)
+        {
+            if (CurrentStatus != ApplicationStatuses.INPROGRESS)
+            {
+                return Result.Fail($"An application can only be submitted when it is {ApplicationStatuses.INPROGRESS}, but it is currently {CurrentStatus}"); // TODO
+            }
+
+            var creation = new StatusTransition(this, ApplicationStatuses.INPROGRESS, ApplicationStatuses.SUBMITTED, effectiveAsOf, ApplicationResolutions.UNRESOLVED);
+            ((List<StatusTransition>)Transitions).Add(creation);
+
+            return Result.Ok(creation);
+        } 
+
+        /// <summary>
+        /// Moves a submitted application to the <see cref="ApplicationStatuses.CLOSED"/> state with a resolution of <see cref="ApplicationResolutions.REJECTED"/>.
+        /// </summary>
+        /// <param name="effectiveAsOf"></param>
+        /// <returns></returns>
+        public Result<StatusTransition> Rejected(DateTime effectiveAsOf)
+        {
+            if (CurrentStatus != ApplicationStatuses.SUBMITTED)
+            {
+                return Result.Fail("Only applications that have been submitted can be marked as rejected.");
+            }
+
+            return Transition(ApplicationStatuses.CLOSED, effectiveAsOf, ApplicationResolutions.REJECTED);
+        }
+
+        /// <summary>
+        /// Moves this application from <see cref="ApplicationStatuses.SUBMITTED"/> to <see cref="ApplicationStatuses.INPROGRESS"/>
+        /// </summary>
+        /// <param name="effectiveAsOf"></param>
+        /// <returns></returns>
+        public Result<StatusTransition> Withdraw(DateTime effectiveAsOf)
+        {
+            if (CurrentStatus != ApplicationStatuses.SUBMITTED)
+            {
+                return Result.Fail("Only applications that have been submitted can be withdrawn.");
+            }
+
+            return Transition(ApplicationStatuses.CLOSED, effectiveAsOf, ApplicationResolutions.WITHDRAWN);
+        }
+
+        public Result<StatusTransition> Reopen(DateTime effectiveAsOf)
+        {
+            if (CurrentStatus != ApplicationStatuses.CLOSED)
+            {
+                return Result.Fail("Only applications that are closed can be reopened.");
+            }
+
+            return Transition(ApplicationStatuses.INPROGRESS, effectiveAsOf);
+        }
+
+        public Result<StatusTransition> Close(DateTime effectiveAsOf)
+        {
+            Result<StatusTransition> result;
+            if (CurrentStatus == ApplicationStatuses.INPROGRESS)
+            {
+                result = Transition(ApplicationStatuses.CLOSED, effectiveAsOf, ApplicationResolutions.NOT_INTERESTED);
+            }
+            else if (CurrentStatus == ApplicationStatuses.SUBMITTED)
+            {
+                result = Transition(ApplicationStatuses.CLOSED, effectiveAsOf, ApplicationResolutions.WITHDRAWN);
+            }
+            else if (CurrentStatus == ApplicationStatuses.SUBMITTED)
+            {
+                result = Transition(ApplicationStatuses.CLOSED, effectiveAsOf, ApplicationResolutions.REJECTED);
+            }
+            else
+            {
+                return Result.Fail("Cannot close the application from its current state.");
+            }
+
+            return result;
+        }
+
         /// <summary>
         /// Transition this application from one status to another.
         /// </summary>
         /// <remarks>
-        /// This method is agnostic about workflows, and will only enforce that you cannot transition from one statu to the same status.
+        /// This method is agnostic about workflows, and will only enforce that you cannot transition from one status to the same status.
         /// Use an appropriate class that derives from <see cref="StatusWrapper"/> (e.g. <see cref="SubmittedApplication"/>) as helpers to more
         /// effective manage the status.
         /// </remarks>
         /// <param name="transitionTo"></param>
         /// <param name="effectiveAsOf"></param>
-        /// <param name="resolution"></param>
+        /// <param name="resolution">A resolution is only respected when <paramref name="transitionTo"/> is <see cref="ApplicationStatuses.CLOSED"/>, otherwise
+        /// it will default to <see cref="ApplicationResolutions.UNRESOLVED"/>.</param>
         /// <returns></returns>
         public Result<StatusTransition> Transition(ApplicationStatuses transitionTo, DateTime effectiveAsOf, ApplicationResolutions resolution = ApplicationResolutions.UNRESOLVED)
         {
             // CAUTION: if the inner logic of this method changes, you may have to revisit the first transition created
-            // in the ctor
+            // in the ctor that somewhat duplicates this logic
 
             if (CurrentStatus == transitionTo)
             {
-                return Result.Fail("Unable to transition to the current status.");
+                return Result.Fail("Unable to transition because the target status is the same as the current status.");
             }
 
             if (transitionTo != ApplicationStatuses.CLOSED)
@@ -115,8 +228,6 @@ namespace LinkedOut.Domain.Entities
             ((List<StatusTransition>)Transitions).Add(transition);
             return Result.Ok(transition);
         }
-
-
 
         /// <summary>
         /// Adds an interview record to this job application.
@@ -144,20 +255,21 @@ namespace LinkedOut.Domain.Entities
         }
         #endregion
 
-        public bool HasOffer => Offer != null;
-        public virtual Offer Offer { get; private set; }
+        //public bool HasOffer => Offer != null;
 
-        public Result<Offer> AddOffer(DateTime extended, string details)
-        {
-            Offer = new Offer(this)
-            {
-                Extended = extended,
-                Expires = extended.AddDays(30),
-                Details = details,
-            };
+        //public virtual Offer Offer { get; private set; }
 
-            return Result.Ok(Offer);
-        }
+        //public Result<Offer> AddOffer(DateTime extended, string details)
+        //{
+        //    Offer = new Offer(this)
+        //    {
+        //        Extended = extended,
+        //        Expires = extended.AddDays(30),
+        //        Details = details,
+        //    };
+
+        //    return Result.Ok(Offer);
+        //}
 
         public Result RemoveNote(int id)
         {
@@ -185,7 +297,7 @@ namespace LinkedOut.Domain.Entities
         {
             var note = new Note(this)
             {
-                Author = "self",
+                Author = Note.SelfAuthoredAuthor,
                 Timestamp = DateTime.Now,
                 Contents = contents
             };

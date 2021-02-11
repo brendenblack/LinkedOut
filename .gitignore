@@ -348,3 +348,6 @@ MigrationBackup/
 
 # Ionide (cross platform F# VS Code tools) working folder
 .ionide/
+/src/LinkedOut.Api/appsettings.Development.json
+/src/LinkedOut.Api/appsettings.json
+/src/LinkedOut.Api/wwwroot/api/specification.json

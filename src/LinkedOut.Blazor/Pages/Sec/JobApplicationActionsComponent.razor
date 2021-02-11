@@ -1,0 +1,178 @@
+﻿@using LinkedOut.Application.JobSearches.Queries.GetJobApplication
+@using LinkedOut.Application.JobSearches.Commands 
+
+@inject IMediator _mediator 
+@inject MessageService _messages 
+
+<nav class="actions">
+    @if (JobApplication.CurrentStatus == ApplicationStatuses.INPROGRESS)
+    {
+        <Button Type="primary" 
+                Icon="plus" 
+                Loading="@_loading"
+                OnClick="@(() => OnSubmitClick.InvokeAsync())">
+            <span class="action-button-text">I have applied</span>
+        </Button>
+    }
+    else if (JobApplication.CurrentStatus == ApplicationStatuses.SUBMITTED)
+    {
+        <Button Type="primary" 
+                Icon="check-circle"
+                Loading="@_loading"
+                OnClick="OnHiredClick">They hired me!</Button>
+
+        <Button Danger 
+                Icon="close-circle"
+                Loading="@_loading"
+                OnClick="handleRejectedClick">They rejected me</Button>
+    }
+    else if (JobApplication.CurrentStatus == ApplicationStatuses.CLOSED)
+    {
+        <Button Icon="undo" 
+                OnClick="handleReopenClick"
+                Loading="@_loading">
+            <span class="action-button-text">Reopen</span>
+        </Button>
+    }
+
+    <Dropdown Overlay="@secondaryActions" Placement="@PlacementType.BottomRight">
+        <ChildContent>
+            <Button Icon="ellipsis" Loading="@_loading" />
+        </ChildContent>
+    </Dropdown>
+</nav>
+
+@code {
+    bool _loading = false;
+    //RenderFragment employerContactButton;
+
+    RenderFragment secondaryActions = @<Menu></Menu>;
+
+    [Parameter]
+    public JobApplicationDto JobApplication { get; set; }
+
+    [Parameter]
+    public EventCallback OnUpdate { get; set; }
+
+    [Parameter]
+    public EventCallback OnSubmitClick { get; set; }
+
+    [Parameter]
+    public EventCallback OnCloseClick { get; set; }
+
+    [Parameter]
+    public EventCallback OnDeleteClick { get; set; }
+
+    [Parameter]
+    public EventCallback OnReopenClick { get; set; }
+
+    [Parameter]
+    public EventCallback OnHiredClick { get; set; }
+
+    [Parameter]
+    public EventCallback OnRejectedClick { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        // as a side note, this is the worst component i've ever made and I hated every second of it
+
+        //employerContactButton = @<Button Icon="comment" OnClick="(() => OnEmployerContactClick.InvokeAsync())"><span class="button-text">Record contact</span></Button>;
+
+        if (JobApplication.CurrentStatus == ApplicationStatuses.INPROGRESS)
+        {
+            secondaryActions = @<Menu>
+                <MenuItem Key="1" OnClick="handleCloseClick">Close</MenuItem>
+                <MenuItem Key="2" OnClick="(() => OnDeleteClick.InvokeAsync())"><Icon Type="delete" /> Delete</MenuItem>
+            </Menu>;
+        }
+        else if (JobApplication.CurrentStatus == ApplicationStatuses.SUBMITTED)
+        {
+            secondaryActions = @<Menu>
+                <MenuItem Key="1" OnClick="handleWithdrawClick">Withdraw application</MenuItem>
+                <MenuItem Key="2" OnClick="handleCloseClick">Close</MenuItem>
+                <MenuItem Key="3" OnClick="(() => OnDeleteClick.InvokeAsync())">Delete</MenuItem>
+            </Menu>;
+        }
+        else if (JobApplication.CurrentStatus == ApplicationStatuses.CLOSED)
+        {
+            secondaryActions = @<Menu>
+                <MenuItem Key="1" OnClick="(() => OnDeleteClick.InvokeAsync())">Delete</MenuItem>
+            </Menu>;
+        }
+
+        await base.OnParametersSetAsync();
+    }
+
+    private async Task handleSubmitClick()
+    {
+
+    }
+
+    private async Task handleRejectedClick()
+    {
+        await handleStandardClick(ApplicationActions.REJECTION);
+    }
+
+    private async Task handleHiredClick()
+    {
+
+    }
+
+    private async Task handleCloseClick()
+    {
+        await handleStandardClick(ApplicationActions.WITHDRAWAL);
+    }
+
+    private async Task handleDeleteClick()
+    {
+
+    }
+
+    private async Task handleReopenClick()
+    {
+        await handleStandardClick(ApplicationActions.REOPEN);
+    }
+
+    private async Task handleWithdrawClick()
+    {
+        // TODO: prompt for confirmation
+        await handleStandardClick(ApplicationActions.WITHDRAWAL);
+    }
+
+    private async Task handleStandardClick(ApplicationActions action)
+    {
+        _loading = true;
+        StateHasChanged();
+
+        var command = new TransitionApplicationCommand
+        {
+            JobApplicationId = JobApplication.Id,
+            Action = action
+        };
+
+        var result = await _mediator.Send(command);
+
+        _loading = false;
+        StateHasChanged();
+
+        if (result.IsSuccess)
+        {
+            await OnUpdate.InvokeAsync();
+        }
+        else
+        {
+            handleError(result);
+        }
+    }
+
+    private void handleError(FluentResults.Result result)
+    {
+        if (result.IsFailed)
+        {
+            foreach (var reason in result.Reasons)
+            {
+                _messages.Error(reason.Message);
+            }
+        }
+    }
+    }

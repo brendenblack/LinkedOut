@@ -21,9 +21,9 @@ namespace LinkedOut.Blazor
 {
     public class Startup
     {
-        private readonly IWebHostEnvironment _hostingEnvironment;
+        private readonly IHostEnvironment _hostingEnvironment;
 
-        public Startup(IConfiguration configuration, IWebHostEnvironment hostingEnvironment)
+        public Startup(IConfiguration configuration, IHostEnvironment hostingEnvironment)
         {
             Configuration = configuration;
             _hostingEnvironment = hostingEnvironment;
@@ -127,6 +127,7 @@ namespace LinkedOut.Blazor
 
             services.AddSingleton<BlazorServerAuthStateCache>();
             services.AddScoped<AuthenticationStateProvider, BlazorServerAuthState>();
+
 
         }
 

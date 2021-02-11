@@ -1,0 +1,96 @@
+﻿@{
+    RenderFragment footer = @<Template>
+        <Button OnClick="@handleOk" @key="@( "submit" )"
+                HtmlType="submit"
+                Type="@ButtonType.Primary"
+                Loading="@_loading">
+            <Icon Type="plus" Theme="outline" /> Add
+        </Button>
+        <Button OnClick="@OnCancel" @key="@( "back" )" Disabled="_loading">Cancel</Button>
+    </Template>;
+}
+
+<Modal Title="Record contact from the employer"
+       Visible="@IsVisible"
+       OnOk="@handleOk"
+       OnCancel="@OnCancel"
+       Footer="@footer">
+    <Form Model="@model"
+          @ref="form"
+          LabelColSpan="6"
+          WrapperColSpan="18">
+        <FormItem Label="Author">
+            <Input @bind-Value="@context.Author" Placeholder="Professor Farnsworth" />
+        </FormItem>
+
+        @*<FormItem Label="Date received">
+            <DatePicker @bind-Value="@timestamp" OnChange="handleDateChange" TValue="DateTime" Format="yyyy-MM-dd HH:MM:ss" ShowTime="@true" />
+        </FormItem>*@
+
+        <FormItem Label="Message">
+            <TextArea @bind-Value="@context.Message" Placeholder="@_placeholder" MinRows="4" MaxRows="8" />
+        </FormItem>
+    </Form>
+</Modal>
+
+@code {
+    [Parameter]
+    public EventCallback<EmployerContactModel> OnSave { get; set; }
+
+    [Parameter]
+    public EventCallback OnCancel { get; set; }
+
+
+    private DateTime timestamp = DateTime.Now;
+
+    [Parameter]
+    public bool IsVisible { get; set; }
+
+    bool _loading = false;
+    Form<EmployerContactModel> form;
+    EmployerContactModel model = new EmployerContactModel { Timestamp = DateTime.Now };
+
+    private void handleDateChange(DateTimeChangedEventArgs args)
+    {
+        model.Timestamp = args.Date;
+    }
+
+    protected override bool ShouldRender()
+    {
+        setPlaceholder();
+        return base.ShouldRender();
+    }
+
+    private async Task handleOk(MouseEventArgs e)
+    {
+        if (form.Validate())
+        {
+            await OnSave.InvokeAsync(model);
+        }
+    }
+
+    public void SetContents(EmployerContactModel model)
+    {
+        this.model = model;
+
+        StateHasChanged();
+    }
+
+    #region Placeholder
+    List<string> _placeholders = new List<string>
+{
+        "Good news, everyone!",
+        "I don't want to live on this planet anymore",
+        "Your mouth just wrote a Paypal request tranfser that your butt has insufficient funds to honor",
+
+    };
+    string _placeholder;
+
+    private void setPlaceholder()
+    {
+        Random random = new Random();
+        int index = random.Next(0, _placeholders.Count);
+        _placeholder = _placeholders[index];
+    }
+    #endregion
+}

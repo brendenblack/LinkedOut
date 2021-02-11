@@ -1,0 +1,79 @@
+﻿@using LinkedOut.Application.JobSearches.Queries.GetJobApplication
+
+@if (Transition != null)
+{
+
+    @*<div>
+        <div class="header">@_time</div>
+        <div class="message">@_message</div>
+    </div>*@
+
+    <div class="ant-comment transition-comment">
+        <div class="ant-comment-inner" style="padding:0;">
+            <div class="ant-comment-avatar">
+                <Icon Type="info-circle" Theme="outline" />
+            </div>
+            <div class="ant-comment-content">
+                <div class="ant-comment-content-author">
+                    <span class="ant-comment-content-author-time">
+                        <Tooltip Title="@_time">
+                            <span>@_timeFromNow</span>
+                        </Tooltip>
+                    </span>
+                </div>
+                <div class="ant-comment-content-detail">
+                    <p>@((MarkupString)_message)</p>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+
+@code {
+    [Parameter]
+    public TransitionDto Transition { get; set; }
+
+    string _timeFromNow;
+
+    string _time;
+
+    string _message;
+
+    protected override Task OnParametersSetAsync()
+    {
+        if (Transition != null)
+        {
+            _timeFromNow = MomentHelper.FromNow(Transition.Timestamp);
+            _time = $"{Transition.Timestamp.ToLongDateString()} {Transition.Timestamp.ToShortTimeString()}";
+
+            if (Transition.TransitionFrom == ApplicationStatuses.CREATED)
+            {
+                _message = "Opportunity recorded";
+            }
+            else if (Transition.TransitionTo == ApplicationStatuses.SUBMITTED)
+            {
+                _message = "You applied to this opportunity";
+            }
+            else if (Transition.TransitionTo == ApplicationStatuses.CLOSED)
+            {
+                _message = "Closed!";
+            }
+            else // TODO: add more
+            {
+                _message = "Transitioned from <i>{Transition.TransitionFrom.ToString().ToLower()}</i> to <i>{Transition.TransitionTo.ToString().ToLower()}</i>";
+            }
+        }
+
+        return base.OnParametersSetAsync();
+    }
+
+    //private string CreateTagMessage(TransitionDto transition)
+    //{
+    //    var from = transition.TransitionFrom;
+    //    var to = transition.TransitionTo;
+
+
+
+    //}
+}

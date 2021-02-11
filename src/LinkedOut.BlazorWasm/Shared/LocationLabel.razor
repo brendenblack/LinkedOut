@@ -1,0 +1,51 @@
+﻿
+<span>
+    <Space>
+        @if (IsRemote)
+        {
+        <SpaceItem>
+            <Tooltip Title="@("This position can be performed remotely")">
+                <Icon Type="global" Theme="outline" />
+            </Tooltip>
+        </SpaceItem>
+        }
+    <SpaceItem>
+        @_label
+    </SpaceItem>
+    </Space>
+</span>
+
+@code {
+    [Parameter]
+    public Location Location { get; set; }
+
+    [Parameter]
+    public bool IsRemote { get; set; } = false;
+
+    private string _label;
+
+    protected override void OnParametersSet()
+    {
+        if (IsRemote == null)
+        {
+            IsRemote = false;
+        }
+
+        if (Location == null || (string.IsNullOrWhiteSpace(Location.CityName) && string.IsNullOrWhiteSpace(Location.Province)))
+        {
+            _label = "Parts Unknown";
+        }
+        else if (string.IsNullOrWhiteSpace(Location.Province))
+        {
+            _label = Location.CityName;
+        }
+        else
+        {
+            _label = $"{Location.CityName}, {Location.Province}";
+        }
+
+
+
+        base.OnParametersSet();
+    }
+}

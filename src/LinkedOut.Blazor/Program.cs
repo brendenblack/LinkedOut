@@ -59,19 +59,23 @@ namespace LinkedOut.Blazor
                         // we only want to seed the database in staging or lower environments
                         logger.LogInformation("Performing database seed for {EnvironmentName}", env.EnvironmentName);
                         var testUserId = config.GetValue<string>("TestUserId", "");
-                        if (string.IsNullOrWhiteSpace(testUserId))
+                        if (!string.IsNullOrWhiteSpace(testUserId))
                         {
-                            testUserId = Guid.NewGuid().ToString();
-                            logger.LogWarning("No test user id was supplied through a TestUserId configuration value. Using GUID {GUID} instead.", testUserId);
+                            var newUserService = services.GetRequiredService<INewUserService>();
+                            await newUserService.InitializeNewUser(testUserId);
                         }
-
-                        // this is a hack to ensure that our ICurrentUserService returns our seed value, instead of
-                        // trying to call GetAuthenticationStateAsync before an AuthenticationState has been set
-
-                        //OidcCurrentUserService oidcCurrentUserService = (OidcCurrentUserService)services.GetRequiredService<ICurrentUserService>();
-                        //oidcCurrentUserService.UserIdOverride = testUserId;
-                        await ApplicationDbContextSeed.SeedTestData(context, testUserId);
-                        //oidcCurrentUserService.UserIdOverride = null;
+                        else
+                        {
+                            // debug instead of warning because data seeding is only crucial in non-prod environments
+                            logger.LogDebug("No test user was supplied through the TestUserId configuration parameter; no data seeding will be done");
+                        }
+                        // this method has been disabled in favour of using INewUserService
+                        //if (string.IsNullOrWhiteSpace(testUserId))
+                        //{
+                        //    testUserId = Guid.NewGuid().ToString();
+                        //    logger.LogWarning("No test user id was supplied through a TestUserId configuration value. Using GUID {GUID} instead.", testUserId);
+                        //}
+                        // await ApplicationDbContextSeed.SeedTestData(context, testUserId);
                     }
                     else
                     {

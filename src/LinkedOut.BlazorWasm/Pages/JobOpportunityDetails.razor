@@ -1,0 +1,421 @@
+﻿@page "/jobsearch/{jobSearchId:int}/opportunity/{jobOpportunityId:int}"
+
+@inject MessageService _message
+@inject JobSearchClient _jobSearchClient
+@inject JobApplicationClient _jobApplicationClient
+
+@if (_loading)
+{
+    <Spin />
+}
+else if (_opportunity == null)
+{
+    <Empty>
+        <DescriptionTemplate>
+            This opportunity doesn't exist. It probably went to someone's nephew.
+        </DescriptionTemplate>
+    </Empty>
+}
+else
+{
+    <div class="container">
+        <PageHeader Class="site-page-header" Title="@($"{_opportunity.JobTitle} at {_opportunity.OrganizationName}")">
+            <PageHeaderBreadcrumb>
+                <Breadcrumb Style="margin: 16px 0;">
+                    <BreadcrumbItem><a href="/jobsearch">Job searches</a></BreadcrumbItem>
+                    <BreadcrumbItem><a href="/jobsearch/@JobSearchId">@_opportunity.ParentSearchTitle</a></BreadcrumbItem>
+                    <BreadcrumbItem>@_opportunity.JobTitle at @_opportunity.OrganizationName</BreadcrumbItem>
+                </Breadcrumb>
+            </PageHeaderBreadcrumb>
+
+            <PageHeaderSubtitle>
+                <Space>
+                    <SpaceItem>
+                        <LocationLabel Location="@_opportunity.Location" IsRemote="true" />
+                    </SpaceItem>
+                    @if (_application != null)
+                    {
+                        <SpaceItem>
+                            <StatusTag Status="@_application.CurrentStatus" />
+                        </SpaceItem>
+                    }
+                </Space>
+            </PageHeaderSubtitle>
+            <PageHeaderExtra>
+                @if (_application != null)
+                {
+                    <JobApplicationActions JobApplicationId="@_application.Id"
+                                           CurrentStatus="@_application.CurrentStatus"
+                                           OnUpdate="handleActionUpdate" />
+                }
+            </PageHeaderExtra>
+        </PageHeader>
+        <Content>
+            @* this control is disabled because it looks awful *@
+            @*<Row Style="background-color: #ffffff;">
+                    <Descriptions Bordered Column="@(new Dictionary<string, int> { { "xs", 1 }, { "lg", 3 }, { "xl", 4 } })">
+                        <DescriptionsItem Title="Location">@_opportunity.Location</DescriptionsItem>
+                        <DescriptionsItem Title="Organization">@_opportunity.OrganizationName</DescriptionsItem>
+                        <DescriptionsItem Title="Title">@_opportunity.JobTitle</DescriptionsItem>
+                    </Descriptions>
+                </Row>*@
+            <div style="display: flex; flex-direction: row;">
+                <div style="flex-grow: 1;">
+                    <Card Title="Job description">
+                        <Extra>
+                            <Tooltip Title="@("View the full description")">
+                                <Button Size="small"
+                                        Icon="file-search"
+                                        OnClick="handleShowDescriptionClick" />
+                            </Tooltip>
+                            <Button Size="small"
+                                    Icon="edit"
+                                    Type="primary"
+                                    Ghost
+                                    OnClick="_ => openDrawer()" />
+                        </Extra>
+                        <Body>
+                            <div style="max-height: 16em; overflow:hidden; text-overflow: ellipsis;">
+                                @((MarkupString)_opportunity.JobDescription)
+                            </div>
+                        </Body>
+                    </Card>
+
+                    <Card Title="Activity">
+                        <Extra>
+                            @*<Button Icon="caret-up" Size="small"></Button>*@
+                            <Tooltip Title="@("Add a note")">
+                                <Button Icon="flag"
+                                        Size="small"
+                                        OnClick="handleAddNoteClick" />
+                            </Tooltip>
+                            <Tooltip Title="@("Record contact from the employer")">
+                                <Button Icon="comment"
+                                        Size="small"
+                                        OnClick="handleAddEmployerContactClick" />
+                            </Tooltip>
+                        </Extra>
+                        <Body>
+                            <Space Direction="vertical" Size="middle">
+                                @foreach (var _event in _events)
+                                {
+                                    <SpaceItem>
+                                        @if (_event.Type == typeof(NoteDto))
+                                        {
+                                            var note = (NoteDto)_event.Value;
+                                            if (note.Author == "self")
+                                            {
+                                                <NoteCard NoteId="@note.Id"
+                                                          Contents="@note.Contents"
+                                                          Timestamp="@note.Timestamp.DateTime"
+                                                          OnDeleteClick="handleNoteDeleteClick"
+                                                          OnEditClick="handleNoteEditClick" />
+                                            }
+                                            else
+                                            {
+                                                <ContactEventCard ContactId="@note.Id"
+                                                                  Timestamp="@note.Timestamp.DateTime"
+                                                                  Author="@note.Author"
+                                                                  Message="@note.Contents"
+                                                                  OnDeleteClick="handleNoteDeleteClick"
+                                                                  OnEditClick="handleEditEmployerContactClick" />
+                                            }
+                                        }
+                                    </SpaceItem>
+                                }
+                            </Space>
+                        </Body>
+                    </Card>
+
+                </div>
+
+
+
+                <div style="padding-top: 2em; padding-left: 2em; min-width: 240px;">
+                    <JobApplicationTimeline Events="_events" />
+
+                </div>
+            </div>
+        </Content>
+    </div>
+
+    <Drawer Closable="true"
+            Width="640"
+            Visible="_drawerVisible"
+            Placement="right"
+            Title='("Edit job description")'
+            OnClose="_ => closeDrawer()">
+        <RichTextInput @bind-Value="_opportunity.JobDescription" />
+        <Button Type="primary" OnClick="handleEditJobDescriptionSave">Save</Button>
+    </Drawer>
+
+    <Modal Visible="@_descriptionModalVisible"
+           Title="@($"{_opportunity.JobTitle} at {_opportunity.OrganizationName}")"
+           Width="640"
+           OnOk="handleDescriptionModalClose"
+           OnCancel="handleDescriptionModalClose">
+        @((MarkupString)_opportunity.JobDescription)
+    </Modal>
+}
+
+<AddNoteModal @ref="addNoteModal"
+              JobApplicationId="@JobOpportunityId"
+              OnNoteSave="handleNoteSave" />
+
+<EmployerContactModal IsVisible="_isEmployerContactModalVisible"
+                      OnSave="handleEmployerContactSave"
+                      OnCancel="handleEmployerContactCancel" />
+
+
+@code {
+    #region Parameters
+    [Parameter]
+    public int JobSearchId { get; set; }
+
+    [Parameter]
+    public int JobOpportunityId { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        Console.WriteLine("Executing OnParametersSetAsync");
+        Console.WriteLine("Calling UpdateOpportunity");
+        await UpdateOpportunity();
+        Console.WriteLine("Calling UpdateApplication");
+        await UpdateApplication();
+        Console.WriteLine("Done");
+
+        await base.OnParametersSetAsync();
+    }
+    #endregion
+
+    List<ChronologicEvent> _events { get; set; } = new List<ChronologicEvent>();
+    bool _loading = false;
+    JobOpportunityDto _opportunity;
+    JobApplicationDto _application;
+    string _pageTitle = "";
+
+
+    #region Opportunity
+    #region job description drawer
+    bool _descriptionModalVisible = false;
+    bool _drawerVisible = false;
+    void openDrawer()
+    {
+        _drawerVisible = true;
+    }
+
+    void closeDrawer()
+    {
+        _drawerVisible = false;
+    }
+
+    async Task handleEditJobDescriptionSave()
+    {
+        var model = new UpdateJobDescriptionModel
+        {
+            Description = _opportunity.JobDescription,
+            Format = Formats.HTML
+        };
+
+        await _jobSearchClient.UpdateJobDescriptionAsync(JobSearchId, JobOpportunityId, model);
+
+        _drawerVisible = false;
+
+        await UpdateOpportunity();
+    }
+    #endregion
+
+    private void handleShowDescriptionClick()
+    {
+        _descriptionModalVisible = true;
+    }
+
+    private void handleDescriptionModalClose()
+    {
+        _descriptionModalVisible = false;
+    }
+
+    #endregion
+
+
+
+    #region Notes
+    private async Task handleNoteDeleteClick(int noteId)
+    {
+        await _jobApplicationClient.DeleteNoteAsync(JobOpportunityId, noteId);
+        await UpdateApplication();
+    }
+
+    private void handleNoteEditClick(int noteId)
+    {
+        //var note = _application.Notes.FirstOrDefault(n => n.Id == noteId);
+        //if (note == null)
+        //{
+
+        //}
+        //else
+        //{
+        //    addNoteModal.SetContents(note.Id, note.Contents);
+        //    addNoteModal.Show();
+        //}
+    }
+
+    private async Task handleNoteSave()
+    {
+        addNoteModal.Hide();
+        await UpdateApplication();
+    }
+
+    AddNoteModal addNoteModal;
+
+    private void handleAddNoteClick()
+    {
+        addNoteModal.Show();
+    }
+    #endregion
+
+    #region Employer contacts
+    EmployerContactModal employerContactModal;
+    bool _isEmployerContactModalVisible = false;
+
+    private void handleEmployerContactCancel()
+    {
+        _isEmployerContactModalVisible = false;
+    }
+    private void handleAddEmployerContactClick()
+    {
+        _isEmployerContactModalVisible = true;
+
+        //var model = new EmployerContactFormModel
+        //{
+        //    JobApplicationId = _application.Id
+        //};
+
+        //employerContactModal.SetContents(model);
+        //employerContactModal.Show();
+    }
+
+    private void handleEditEmployerContactClick(int employerContactId)
+    {
+        //var employerContact = _application.Notes.FirstOrDefault(n => n.Id == (employerContactId));
+
+        //if (employerContact == null)
+        //{
+        //    _message.Error("An error or something has occurred");
+        //    return;
+        //}
+
+        //var model = new EmployerContactFormModel
+        //{
+        //    Author = employerContact.Author,
+        //    Timestamp = employerContact.Timestamp,
+        //    NoteId = employerContact.Id,
+        //    Message = employerContact.Contents
+        //};
+
+        //employerContactModal.SetContents(model);
+
+        //employerContactModal.Show();
+    }
+
+    private async Task handleEmployerContactSave(EmployerContactModel model)
+    {
+        await _jobApplicationClient.AddEmployerContactAsync(JobOpportunityId, model);
+        _isEmployerContactModalVisible = false;
+
+        await UpdateApplication();
+    }
+    #endregion
+
+    #region Action bar handlers
+    private async Task handleActionUpdate()
+    {
+        await UpdateApplication();
+    }
+    #endregion
+
+
+
+    private async Task UpdateOpportunity()
+    {
+        Console.WriteLine("Fetching opportunity");
+        _opportunity = await _jobSearchClient.GetJobOpportunityAsync(JobSearchId, JobOpportunityId);
+
+        if (_opportunity != null)
+        {
+            _pageTitle = $"{_opportunity.JobTitle} at {_opportunity.OrganizationName}";
+            Console.WriteLine($"Returned {_pageTitle}");
+        }
+        else
+        {
+            Console.WriteLine("Opportunity not found.");
+        }
+
+        StateHasChanged();
+    }
+
+    bool _loadingApplication = false;
+    private async Task UpdateApplication()
+    {
+        _loadingApplication = true;
+        var _application = await _jobApplicationClient.GetJobApplicationAsync(JobOpportunityId);
+        if (_application != null)
+        {
+            var combined = new List<ChronologicEvent>();
+            var chronologicalNotes = _application.Notes?
+                .Select(n => new ChronologicEvent
+                {
+                    Timestamp = n.Timestamp.DateTime,
+                    Value = n,
+                    Type = typeof(NoteDto)
+                }) ?? new List<ChronologicEvent>();
+            combined.AddRange(chronologicalNotes);
+
+            var chronologicalTransitions = _application.Transitions?
+                .Select(n => new ChronologicEvent
+                {
+                    Timestamp = n.Timestamp.DateTime,
+                    Value = n,
+                    Type = typeof(TransitionDto)
+                }) ?? new List<ChronologicEvent>();
+            combined.AddRange(chronologicalTransitions);
+
+            _events = combined
+                .OrderBy(c => c.Timestamp)
+                .ToList();
+        }
+
+        _loadingApplication = false;
+        StateHasChanged();
+    }
+
+    //private async Task handleJobDescriptionSave(RichTextSaveResult saveResult)
+    //{
+    //    var command = new UpdateJobDescriptionCommand
+    //    {
+    //        Description = saveResult.Contents,
+    //        DescriptionFormat = saveResult.Format,
+    //        JobApplicationId = _application.Id,
+    //        JobTitle = _opportunity.JobTitle,
+    //        OrganizationName = _opportunity.JobTitle,
+    //    };
+
+    //    var result = await _mediator.Send(command);
+
+    //    if (result.IsSuccess)
+    //    {
+    //        _opportunity.JobDescription = saveResult.Contents;
+    //        _opportunity.JobDescriptionFormat = saveResult.Format;
+    //        StateHasChanged();
+    //        //await UpdateOpportunity();
+    //    }
+    //    else
+    //    {
+    //        foreach (var reason in result.Reasons)
+    //        {
+    //            await _message.Error(reason.Message);
+    //        }
+    //    }
+    //}
+
+}

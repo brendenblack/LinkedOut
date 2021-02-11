@@ -1,0 +1,17 @@
+﻿@if (Status == ApplicationStatuses.CLOSED)
+{
+    <Tag>Closed</Tag>
+}
+else if (Status == ApplicationStatuses.INPROGRESS)
+{
+    <Tag Color="gold">Interested</Tag>
+}
+else if (Status == ApplicationStatuses.SUBMITTED)
+{
+    <Tag Color="green">Applied</Tag>
+}
+
+@code {
+    [Parameter]
+    public ApplicationStatuses Status { get; set; }
+}

@@ -1,0 +1,62 @@
+﻿<div class="ant-comment transition-comment">
+    <div class="ant-comment-inner" style="padding:0;">
+        <div class="ant-comment-avatar">
+            <Icon Type="info-circle" Theme="outline" />
+        </div>
+        <div class="ant-comment-content">
+            <div class="ant-comment-content-author">
+                <span class="ant-comment-content-author-time">
+                    <Tooltip Title="@_time">
+                        <span>@_timeFromNow</span>
+                    </Tooltip>
+                </span>
+            </div>
+            <div class="ant-comment-content-detail">
+                <p>@((MarkupString)_message)</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public ApplicationStatuses From { get; set; }
+
+    [Parameter]
+    public ApplicationStatuses To { get; set; }
+
+    [Parameter]
+    public DateTime Timestamp { get; set; }
+
+    string _timeFromNow;
+
+    string _time;
+
+    string _message;
+
+    protected override Task OnParametersSetAsync()
+    {
+            _timeFromNow = MomentHelper.FromNow(Timestamp);
+            _time = $"{Timestamp.ToLongDateString()} {Timestamp.ToShortTimeString()}";
+
+            if (From == ApplicationStatuses.CREATED)
+            {
+                _message = "Opportunity recorded";
+            }
+            else if (To == ApplicationStatuses.SUBMITTED)
+            {
+                _message = "You applied to this opportunity";
+            }
+            else if (To == ApplicationStatuses.CLOSED)
+            {
+                _message = "Closed!";
+            }
+            else // TODO: add more
+            {
+                _message = "Transitioned from <i>{Transition.TransitionFrom.ToString().ToLower()}</i> to <i>{Transition.TransitionTo.ToString().ToLower()}</i>";
+            }
+        
+
+        return base.OnParametersSetAsync();
+    }
+}

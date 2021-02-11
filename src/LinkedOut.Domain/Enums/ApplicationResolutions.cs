@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace LinkedOut.Domain
+namespace LinkedOut
 {
     public enum ApplicationResolutions
     {
@@ -10,6 +10,7 @@ namespace LinkedOut.Domain
         /// The application is still in progress.
         /// </summary>
         UNRESOLVED,
+        NOT_INTERESTED,
         WITHDRAWN,
         CANCELLED,
         REJECTED,
